@@ -39,7 +39,7 @@ class BlockCms extends Module
 	{
 		$this->name = 'blockcms';
 		$this->tab = 'front_office_features';
-		$this->version = '1.6';
+		$this->version = '1.7';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -49,6 +49,7 @@ class BlockCms extends Module
 		$this->displayName = $this->l('CMS block');
 		$this->description = $this->l('Adds a block with several CMS links.');
 		$this->secure_key = Tools::encrypt($this->name);
+		$this->ps_versions_compliancy = array('min' => '1.5.6.1', 'max' => _PS_VERSION_);
 	}
 
 	public function install()
