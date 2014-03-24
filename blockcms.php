@@ -175,7 +175,7 @@ class BlockCms extends Module
 			'input' => array(
 				array(
 					'type' => 'cms_blocks',
-					'label' => $this->l('CMS Blocks:'),
+					'label' => $this->l('CMS Blocks'),
 					'name' => 'cms_blocks',
 					'values' => array(
 						0 => BlockCMSModel::getCMSBlocksByLocation(BlockCMSModel::LEFT_COLUMN, Shop::getContextShopID()),
@@ -194,7 +194,7 @@ class BlockCms extends Module
 		$this->fields_form[1]['form'] = array(
 			'tinymce' => true,
 			'legend' => array(
-				'title' => $this->l('Footer\'s various links Configuration'),
+				'title' => $this->l('Configuration of the various links in the footer'),
 				'icon' => 'icon-link'
 			),
 			'input' => array(
@@ -235,7 +235,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "our stores" link in the footer'),
+								'name' => $this->l('Display "Our stores" link in the footer'),
 								'val' => '1'
 							),
 						),
@@ -315,13 +315,13 @@ class BlockCms extends Module
 		$this->fields_form[0]['form'] = array(
 			'tinymce' => true,
 			'legend' => array(
-				'title' => isset($cmsBlock) ? $this->l('Edit the CMS block.') : $this->l('New CMS block.'),
+				'title' => isset($cmsBlock) ? $this->l('Edit the CMS block.') : $this->l('New CMS block'),
 				'icon' => isset($cmsBlock) ? 'icon-edit' : 'icon-plus-square'
 			),
 			'input' => array(
 				array(
 					'type' => 'text',
-					'label' => $this->l('Name of the CMS block:'),
+					'label' => $this->l('Name of the CMS block'),
 					'name' => 'block_name',
 					'lang' => true,
 					'desc' => $this->l('If you leave this field empty, the block name will use the category name by default.')
@@ -355,7 +355,7 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'switch',
-					'label' => $this->l('Display stores'),
+					'label' => $this->l('Add store tool link'),
 					'name' => 'display_stores',
 					'is_bool' => true,
 					'values' => array(
@@ -368,11 +368,11 @@ class BlockCms extends Module
 							'value' => 0,
 							'label' => $this->l('No')),
 					),
-					'desc' => $this->l('Displays the "Our stores" link at the end of the block.')
+					'desc' => $this->l('Adds the "Our stores" link at the end of the block.')
 				),
 				array(
 					'type' => 'cms_pages',
-					'label' => $this->l('CMS content:'),
+					'label' => $this->l('CMS content'),
 					'name' => 'cmsBox[]',
 					'values' => BlockCMSModel::getAllCMSStructure(),
 					'desc' => $this->l('Please mark every page that you want to display in this block.')
@@ -556,7 +556,7 @@ class BlockCms extends Module
 			}
 
 			if ((Tools::getValue('cms_footer_on') != 0) && (Tools::getValue('cms_footer_on') != 1))
-				$this->_errors[] = $this->l('Invalid activation footer.');
+				$this->_errors[] = $this->l('Invalid footer activation.');
 		}
 		if (count($this->_errors))
 		{
@@ -599,7 +599,7 @@ class BlockCms extends Module
 						BlockCMSModel::insertCMSBlockShop($id_cms_block, $shop);
 				}
 
-				$this->_errors[] = $this->l('A new block cannot be created!');
+				$this->_errors[] = $this->l('Cannot create a block!');
 			}
 			elseif (Tools::isSubmit('editBlockCMS'))
 			{
@@ -669,7 +669,7 @@ class BlockCms extends Module
 		elseif (Tools::isSubmit('editBlockCMSConfirmation'))
 			$this->_html .= $this->displayConfirmation($this->l('CMS block edited.'));
 		elseif (Tools::isSubmit('deleteBlockCMSConfirmation'))
-			$this->_html .= $this->displayConfirmation($this->l('Deletion successful'));
+			$this->_html .= $this->displayConfirmation($this->l('Deletion successful.'));
 		elseif (Tools::isSubmit('id_cms_block') && Tools::isSubmit('way') && Tools::isSubmit('position') && Tools::isSubmit('location'))
 			$this->changePosition();
 		elseif (Tools::isSubmit('updatePositions'))
