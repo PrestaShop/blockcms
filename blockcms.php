@@ -39,7 +39,7 @@ class BlockCms extends Module
 	{
 		$this->name = 'blockcms';
 		$this->tab = 'front_office_features';
-		$this->version = '1.7';
+		$this->version = '1.8';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -245,6 +245,81 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'checkbox',
+					'name' => 'cms_footer_display_price-drop',
+					'values' => array(
+						'query' => array(
+							array(
+								'id' => 'on',
+								'name' => $this->l('Display "Price drop" link in the footer'),
+								'val' => '1'
+							),
+						),
+						'id' => 'id',
+						'name' => 'name'
+					)
+				),
+				array(
+					'type' => 'checkbox',
+					'name' => 'cms_footer_display_new-products',
+					'values' => array(
+						'query' => array(
+							array(
+								'id' => 'on',
+								'name' => $this->l('Display "new products" link in the footer'),
+								'val' => '1'
+							),
+						),
+						'id' => 'id',
+						'name' => 'name'
+					)
+				),
+				array(
+					'type' => 'checkbox',
+					'name' => 'cms_footer_display_best-sales',
+					'values' => array(
+						'query' => array(
+							array(
+								'id' => 'on',
+								'name' => $this->l('Display "best sales" link in the footer'),
+								'val' => '1'
+							),
+						),
+						'id' => 'id',
+						'name' => 'name'
+					)
+				),
+				array(
+					'type' => 'checkbox',
+					'name' => 'cms_footer_display_contact',
+					'values' => array(
+						'query' => array(
+							array(
+								'id' => 'on',
+								'name' => $this->l('Display "Contact us" link in the footer'),
+								'val' => '1'
+							),
+						),
+						'id' => 'id',
+						'name' => 'name'
+					)
+				),
+				array(
+					'type' => 'checkbox',
+					'name' => 'cms_footer_display_sitemap',
+					'values' => array(
+						'query' => array(
+							array(
+								'id' => 'on',
+								'name' => $this->l('Display sitemap link in the footer'),
+								'val' => '1'
+							),
+						),
+						'id' => 'id',
+						'name' => 'name'
+					)
+				),
+				array(
+					'type' => 'checkbox',
 					'name' => 'cms_footer_powered_by',
 					'values' => array(
 						'query' => array(
@@ -276,6 +351,11 @@ class BlockCms extends Module
 		$this->fields_value['cms_footer_on'] = Configuration::get('FOOTER_BLOCK_ACTIVATION');
 		$this->fields_value['cms_footer_powered_by_on'] = Configuration::get('FOOTER_POWEREDBY');
 		$this->fields_value['PS_STORES_DISPLAY_FOOTER_on'] = Configuration::get('PS_STORES_DISPLAY_FOOTER');
+		$this->fields_value['cms_footer_display_price-drop_on'] = Configuration::get('FOOTER_PRICE-DROP');
+		$this->fields_value['cms_footer_display_new-products_on'] = Configuration::get('FOOTER_NEW-PRODUCTS');
+		$this->fields_value['cms_footer_display_best-sales_on'] = Configuration::get('FOOTER_BEST-SALES');
+		$this->fields_value['cms_footer_display_contact_on'] = Configuration::get('FOOTER_CONTACT');
+		$this->fields_value['cms_footer_display_sitemap_on'] = Configuration::get('FOOTER_SITEMAP');
 
 		foreach ($this->context->controller->_languages as $language)
 		{
@@ -662,6 +742,12 @@ class BlockCms extends Module
 			Configuration::updateValue('FOOTER_POWEREDBY', $powered_by);
 			Configuration::updateValue('FOOTER_BLOCK_ACTIVATION', $block_activation);
 
+			Configuration::updateValue('FOOTER_PRICE-DROP', (int)Tools::getValue('cms_footer_display_price-drop_on'));
+			Configuration::updateValue('FOOTER_NEW-PRODUCTS', (int)Tools::getValue('cms_footer_display_new-products_on'));
+			Configuration::updateValue('FOOTER_BEST-SALES', (int)Tools::getValue('cms_footer_display_best-sales_on'));
+			Configuration::updateValue('FOOTER_CONTACT', (int)Tools::getValue('cms_footer_display_contact_on'));
+			Configuration::updateValue('FOOTER_SITEMAP', (int)Tools::getValue('cms_footer_display_sitemap_on'));
+
 			$this->_html .= $this->displayConfirmation($this->l('Update your footer\'s information.'));
 		}
 		elseif (Tools::isSubmit('addBlockCMSConfirmation'))
@@ -752,19 +838,20 @@ class BlockCms extends Module
 
 		if (!$this->isCached('blockcms.tpl', $this->getCacheId(BlockCMSModel::FOOTER)))
 		{
-			$cms_titles = BlockCMSModel::getCMSTitlesFooter();
-			$display_footer = Configuration::get('PS_STORES_DISPLAY_FOOTER');
 			$display_poweredby = Configuration::get('FOOTER_POWEREDBY');
-			$footer_text = Configuration::get('FOOTER_CMS_TEXT_'.(int)$this->context->language->id);
-
 			$this->smarty->assign(
 				array(
 					'block' => 0,
 					'contact_url' => 'contact',
-					'cmslinks' => $cms_titles,
-					'display_stores_footer' => $display_footer,
+					'cmslinks' => BlockCMSModel::getCMSTitlesFooter(),
+					'display_stores_footer' => Configuration::get('PS_STORES_DISPLAY_FOOTER'),
 					'display_poweredby' => ((int)$display_poweredby === 1 || $display_poweredby === false),
-					'footer_text' => $footer_text
+					'footer_text' => Configuration::get('FOOTER_CMS_TEXT_'.(int)$this->context->language->id),
+					'show_price_drop' => Configuration::get('FOOTER_PRICE-DROP'),
+					'show_new_products' => Configuration::get('FOOTER_NEW-PRODUCTS'),
+					'show_best_sales' => Configuration::get('FOOTER_BEST-SALES'),
+					'show_contact' => Configuration::get('FOOTER_CONTACT'),
+					'show_sitemap' => Configuration::get('FOOTER_SITEMAP')
 				)
 			);
 		}
