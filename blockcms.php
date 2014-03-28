@@ -39,7 +39,7 @@ class BlockCms extends Module
 	{
 		$this->name = 'blockcms';
 		$this->tab = 'front_office_features';
-		$this->version = '1.8';
+		$this->version = '1.9';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -67,6 +67,11 @@ class BlockCms extends Module
 			|| !Configuration::updateValue('FOOTER_CMS', '')
 			|| !Configuration::updateValue('FOOTER_BLOCK_ACTIVATION', 1)
 			|| !Configuration::updateValue('FOOTER_POWEREDBY', 1)
+			|| !Configuration::updateValue('FOOTER_PRICE-DROP', 1)
+			|| !Configuration::updateValue('FOOTER_NEW-PRODUCTS', 1)
+			|| !Configuration::updateValue('FOOTER_BEST-SALES', 1)
+			|| !Configuration::updateValue('FOOTER_CONTACT', 1)
+			|| !Configuration::updateValue('FOOTER_SITEMAP', 1)
 		)
 		return false;
 
@@ -118,7 +123,13 @@ class BlockCms extends Module
 			!BlockCMSModel::DropTables() ||
 			!Configuration::deleteByName('FOOTER_CMS') ||
 			!Configuration::deleteByName('FOOTER_BLOCK_ACTIVATION') ||
-			!Configuration::deleteByName('FOOTER_POWEREDBY'))
+			!Configuration::deleteByName('FOOTER_POWEREDBY') ||
+			!Configuration::deleteByName('FOOTER_PRICE-DROP') ||
+			!Configuration::deleteByName('FOOTER_NEW-PRODUCTS') ||
+			!Configuration::deleteByName('FOOTER_BEST-SALES') ||
+			!Configuration::deleteByName('FOOTER_CONTACT') ||
+			!Configuration::deleteByName('FOOTER_SITEMAP')
+		)
 			return false;
 		return true;
 	}
