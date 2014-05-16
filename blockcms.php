@@ -233,7 +233,7 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'textarea',
-					'label' => $this->l('Footer informations'),
+					'label' => $this->l('Footer information'),
 					'name' => 'footer_text',
 					'rows' => 5,
 					'cols' => 60,
