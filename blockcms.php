@@ -216,7 +216,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display various links and information in the Footer'),
+								'name' => $this->l('Display various links and information in the footer'),
 								'val' => '1'
 							),
 						),
@@ -276,7 +276,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "new products" link in the footer'),
+								'name' => $this->l('Display "New products" link in the footer'),
 								'val' => '1'
 							),
 						),
@@ -291,7 +291,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "best sales" link in the footer'),
+								'name' => $this->l('Display "Best sales" link in the footer'),
 								'val' => '1'
 							),
 						),
@@ -336,7 +336,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "Powered by PrestaShop"'),
+								'name' => $this->l('Display "Powered by PrestaShop" in the footer.'),
 								'val' => '1'
 							),
 						),
