@@ -336,7 +336,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "Powered by PrestaShop" in the footer.'),
+								'name' => $this->l('Display "Powered by PrestaShop" in the footer'),
 								'val' => '1'
 							),
 						),
