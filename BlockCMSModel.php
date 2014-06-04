@@ -81,6 +81,7 @@ class BlockCMSModel extends ObjectModel
 		$sql = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'cms_block`(
 			`id_cms_block` int(10) unsigned NOT NULL auto_increment,
 			`id_cms_category` int(10) unsigned NOT NULL,
+			`id_category_product` int(10) unsigned NOT NULL,
 			`location` tinyint(1) unsigned NOT NULL,
 			`position` int(10) unsigned NOT NULL default \'0\',
 			`display_store` tinyint(1) unsigned NOT NULL default \'1\',
@@ -126,10 +127,10 @@ class BlockCMSModel extends ObjectModel
 		return Db::getInstance()->execute($sql);
 	}
 
-	public static function insertCMSBlock($id_category, $location, $position, $display_store)
+	public static function insertCMSBlock($id_category, $location, $position, $display_store, $id_category_product)
 	{
-		$sql = 'INSERT INTO `'._DB_PREFIX_.'cms_block` (`id_cms_category`, `location`, `position`, `display_store`)
-			VALUES('.(int)$id_category.', '.(int)$location.', '.(int)$position.', '.(int)$display_store.')';
+		$sql = 'INSERT INTO `'._DB_PREFIX_.'cms_block` (`id_cms_category`, `id_category_product`, `location`, `position`, `display_store`)
+			VALUES('.(int)$id_category.', '.(int)$id_category_product.', '.(int)$location.', '.(int)$position.', '.(int)$display_store.')';
 
 		if (Db::getInstance()->execute($sql))
             return Db::getInstance()->Insert_ID();
@@ -167,11 +168,12 @@ class BlockCMSModel extends ObjectModel
 		return Db::getInstance()->Insert_ID();
 	}
 
-	public static function updateCMSBlock($id_cms_block, $id_cms_category, $position, $location, $display_store)
+	public static function updateCMSBlock($id_cms_block, $id_cms_category, $position, $location, $display_store, $id_category_product)
 	{
 		$sql = 'UPDATE `'._DB_PREFIX_.'cms_block`
 			SET `location` = '.(int)$location.',
 			`id_cms_category` = '.(int)$id_cms_category.',
+			`id_category_product` = '.(int)$id_category_product.',
 			`position` = '.(int)$position.',
 			`display_store` = '.(int)$display_store.'
 			WHERE `id_cms_block` = '.(int)$id_cms_block;
@@ -328,7 +330,7 @@ class BlockCMSModel extends ObjectModel
 	{
 		$context = Context::getContext();
 
-		$sql = 'SELECT bc.`id_cms_block`, bc.`id_cms_category`, bc.`display_store`, ccl.`link_rewrite`, ccl.`name` category_name, bcl.`name` block_name
+		$sql = 'SELECT bc.`id_cms_block`, bc.`id_category_product`, bc.`id_cms_category`, bc.`display_store`, ccl.`link_rewrite`, ccl.`name` category_name, bcl.`name` block_name
 			FROM `'._DB_PREFIX_.'cms_block` bc
 			LEFT JOIN `'._DB_PREFIX_.'cms_block_shop` bcs
 			ON (bcs.id_cms_block = bc.id_cms_block)
@@ -440,7 +442,7 @@ class BlockCMSModel extends ObjectModel
 	/* Get a single CMS block by its ID */
 	public static function getBlockCMS($id_cms_block)
 	{
-		$sql = 'SELECT cb.`id_cms_category`, cb.`location`, cb.`position`, cb.`display_store`, cbl.id_lang, cbl.name
+		$sql = 'SELECT cb.`id_cms_category`, cb.`id_category_product`, cb.`location`, cb.`position`, cb.`display_store`, cbl.id_lang, cbl.name
 			FROM `'._DB_PREFIX_.'cms_block` cb
 			LEFT JOIN `'._DB_PREFIX_.'cms_block_lang` cbl
 			ON (cbl.`id_cms_block` = cb.`id_cms_block`)
@@ -540,6 +542,8 @@ class BlockCMSModel extends ObjectModel
 				$key = (int)$cmsCategory['id_cms_block'];
 				$content[$key]['display_store'] = $cmsCategory['display_store'];
 				$content[$key]['cms'] = BlockCMSModel::getCMSBlockPages($cmsCategory['id_cms_block'], $id_shop);
+				// Set id product category
+				$content[$key]['id_category_product'] = $cmsCategory['id_category_product'];
 				$links = array();
 				if (count($content[$key]['cms']))
 				{
