@@ -435,10 +435,10 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => BlockCMSModel::LEFT_COLUMN,
-								'name' => $this->l('Left')),
+								'name' => $this->l('Left column')),
 							array(
 								'id' => BlockCMSModel::RIGHT_COLUMN,
-								'name' => $this->l('Right')),
+								'name' => $this->l('Right column')),
 						),
 						'id' => 'id',
 						'name' => 'name'
@@ -446,7 +446,7 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'switch',
-					'label' => $this->l('Add store tool link'),
+					'label' => $this->l('Add link to Store Locator'),
 					'name' => 'display_stores',
 					'is_bool' => true,
 					'values' => array(
