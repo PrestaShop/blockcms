@@ -44,7 +44,7 @@ class BlockCms extends Module
 		$this->need_instance = 0;
 
 		$this->bootstrap = true;
-		parent::__construct();	
+		parent::__construct();
 
 		$this->displayName = $this->l('CMS block');
 		$this->description = $this->l('Adds a block with several CMS links.');
@@ -76,12 +76,13 @@ class BlockCms extends Module
 		return false;
 
 		$this->_clearCache('blockcms.tpl');
-		
+
 		// Install fixtures for blockcms
 		$default = Db::getInstance()->insert('cms_block', array(
-			'id_cms_category' =>	1,
-			'location' =>			0,
-			'position' =>			0,
+			'id_cms_category'     =>	1,
+			'id_category_product' =>    0,
+			'location'            =>	0,
+			'position'            =>	0,
 		));
 
 		if (!$default)
@@ -172,7 +173,7 @@ class BlockCms extends Module
 	{
 		$this->context->controller->addJqueryPlugin('tablednd');
 		$this->context->controller->addJS(_PS_JS_DIR_.'admin-dnd.js');
-		
+
 		$current_index = AdminController::$currentIndex;
 		$token = Tools::getAdminTokenLite('AdminModules');
 
@@ -197,7 +198,7 @@ class BlockCms extends Module
 				'newBlock' => array(
 					'title' => $this->l('New block'),
 					'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;addBlockCMS',
-					'class' => 'pull-right', 
+					'class' => 'pull-right',
 					'icon' => 'process-icon-new'
 				)
 			)
@@ -428,6 +429,12 @@ class BlockCms extends Module
 					)
 				),
 				array(
+					'type'  => 'categories',
+					'label' => $this->l('Product Category'),
+					'name'  => 'id_category_product',
+					'tree'  => 'selected_categories',
+				),
+				array(
 					'type' => 'select',
 					'label' => $this->l('Location'),
 					'name' => 'block_location',
@@ -524,7 +531,7 @@ class BlockCms extends Module
 				foreach ($cmsBlockCategories as $item)
 					$this->fields_value['1_'.$item['id_cms']] = true;
 		}
-		
+
 		$helper = $this->initForm();
 
 		if (isset($id_cms_block))
@@ -665,7 +672,7 @@ class BlockCms extends Module
 			return false;
 
 		$this->_clearCache('blockcms.tpl');
-		
+
 		$this->_errors = array();
 		if (Tools::isSubmit('submitBlockCMS'))
 		{
@@ -674,10 +681,11 @@ class BlockCms extends Module
 			$display_store = (int)Tools::getValue('display_stores');
 			$location = (int)Tools::getvalue('block_location');
 			$position = BlockCMSModel::getMaxPosition($location);
+			$id_category_product = (int)Tools::getValue('id_category_product');
 
 			if (Tools::isSubmit('addBlockCMS'))
 			{
-				$id_cms_block = BlockCMSModel::insertCMSBlock($id_cms_category, $location, $position, $display_store);
+				$id_cms_block = BlockCMSModel::insertCMSBlock($id_cms_category, $location, $position, $display_store, $id_category_product);
 
 				if ($id_cms_block !== false)
 				{
@@ -702,7 +710,7 @@ class BlockCms extends Module
 				if ($old_block[1]['location'] != (int)Tools::getvalue('block_location'))
 					BlockCMSModel::updatePositions($old_block[1]['position'], $old_block[1]['position'] + 1, $old_block[1]['location']);
 
-				BlockCMSModel::updateCMSBlock($id_cms_block, $id_cms_category, $position, $location, $display_store);
+				BlockCMSModel::updateCMSBlock($id_cms_block, $id_cms_category, $position, $location, $display_store, $id_category_product);
 
 				foreach ($this->context->controller->_languages as $language)
 				{
@@ -795,17 +803,20 @@ class BlockCms extends Module
 	{
 		if (!$this->isCached('blockcms.tpl', $this->getCacheId($column)))
 		{
-			$cms_titles = BlockCMSModel::getCMSTitles($column);
+			$cms_titles               = BlockCMSModel::getCMSTitles($column);
+			// Get id current visited Category
+			$current_category_product = $this->context->cookie->last_visited_category;
 
 			$this->smarty->assign(array(
-				'block' => 1,
-				'cms_titles' => $cms_titles,
-				'contact_url' => (_PS_VERSION_ >= 1.5) ? 'contact' : 'contact-form'
+				'block'                    => 1,
+				'cms_titles'               => $cms_titles,
+				'current_category_product' => $current_category_product,
+				'contact_url'              => (_PS_VERSION_ >= 1.5) ? 'contact' : 'contact-form'
 			));
 		}
 		return $this->display(__FILE__, 'blockcms.tpl', $this->getCacheId($column));
 	}
-	
+
 	protected function getCacheId($name = null)
 	{
 		return parent::getCacheId('blockcms|'.$name);
@@ -886,13 +897,13 @@ class BlockCms extends Module
 				BlockCMSModel::updateCMSBlockPosition($pos[2], $position);
 		}
 	}
-	
+
 	public function hookActionShopDataDuplication($params)
 	{
 		//get all cmd block to duplicate in new shop
 		$cms_blocks = Db::getInstance()->executeS('
-			SELECT * FROM `'._DB_PREFIX_.'cms_block` cb 
-			JOIN `'._DB_PREFIX_.'cms_block_shop` cbf 
+			SELECT * FROM `'._DB_PREFIX_.'cms_block` cb
+			JOIN `'._DB_PREFIX_.'cms_block_shop` cbf
 				ON (cb.`id_cms_block` = cbf.`id_cms_block` AND cbf.`id_shop` = '.(int)$params['old_id_shop'].') ');
 
 		if (count($cms_blocks))
@@ -900,25 +911,25 @@ class BlockCms extends Module
 			foreach ($cms_blocks as $cms_block)
 			{
 				Db::getInstance()->execute('
-					INSERT IGNORE INTO '._DB_PREFIX_.'cms_block (`id_cms_block`, `id_cms_category`, `location`, `position`, `display_store`) 
+					INSERT IGNORE INTO '._DB_PREFIX_.'cms_block (`id_cms_block`, `id_cms_category`, `location`, `position`, `display_store`)
 					VALUES (NULL, '.(int)$cms_block['id_cms_category'].', '.(int)$cms_block['location'].', '.(int)$cms_block['position'].', '.(int)$cms_block['display_store'].');');
 
 				$id_block_cms =  Db::getInstance()->Insert_ID();
-				
+
 				Db::getInstance()->execute('INSERT IGNORE INTO '._DB_PREFIX_.'cms_block_shop (`id_cms_block`, `id_shop`) VALUES ('.(int)$id_block_cms.', '.(int)$params['new_id_shop'].');');
-				
+
 				$langs = Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'cms_block_lang` WHERE `id_cms_block` = '.(int)$cms_block['id_cms_block']);
-				
+
 				foreach($langs as $lang)
 					Db::getInstance()->execute('
-						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_lang` (`id_cms_block`, `id_lang`, `name`) 
+						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_lang` (`id_cms_block`, `id_lang`, `name`)
 						VALUES ('.(int)$id_block_cms.', '.(int)$lang['id_lang'].', \''.pSQL($lang['name']).'\');');
-				
+
 				$pages =  Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'cms_block_page` WHERE `id_cms_block` = '.(int)$cms_block['id_cms_block']);
-				
+
 				foreach($pages as $page)
 					Db::getInstance()->execute('
-						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_page` (`id_cms_block_page`, `id_cms_block`, `id_cms`, `is_category`) 
+						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_page` (`id_cms_block_page`, `id_cms_block`, `id_cms`, `is_category`)
 						VALUES (NULL, '.(int)$id_block_cms.', '.(int)$page['id_cms'].', '.(int)$page['is_category'].');');
 			}
 		}
