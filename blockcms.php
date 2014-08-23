@@ -39,7 +39,7 @@ class BlockCms extends Module
 	{
 		$this->name = 'blockcms';
 		$this->tab = 'front_office_features';
-		$this->version = '1.9';
+		$this->version = '2.0.0';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -216,7 +216,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display various links and information in the Footer'),
+								'name' => $this->l('Display various links and information in the footer'),
 								'val' => '1'
 							),
 						),
@@ -233,7 +233,7 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'textarea',
-					'label' => $this->l('Footer informations'),
+					'label' => $this->l('Footer information'),
 					'name' => 'footer_text',
 					'rows' => 5,
 					'cols' => 60,
@@ -276,7 +276,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "new products" link in the footer'),
+								'name' => $this->l('Display "New products" link in the footer'),
 								'val' => '1'
 							),
 						),
@@ -291,7 +291,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "best sales" link in the footer'),
+								'name' => $this->l('Display "Best sales" link in the footer'),
 								'val' => '1'
 							),
 						),
@@ -336,7 +336,7 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => 'on',
-								'name' => $this->l('Display "Powered by PrestaShop"'),
+								'name' => $this->l('Display "Powered by PrestaShop" in the footer'),
 								'val' => '1'
 							),
 						),
@@ -435,10 +435,10 @@ class BlockCms extends Module
 						'query' => array(
 							array(
 								'id' => BlockCMSModel::LEFT_COLUMN,
-								'name' => $this->l('Left')),
+								'name' => $this->l('Left column')),
 							array(
 								'id' => BlockCMSModel::RIGHT_COLUMN,
-								'name' => $this->l('Right')),
+								'name' => $this->l('Right column')),
 						),
 						'id' => 'id',
 						'name' => 'name'
@@ -446,7 +446,7 @@ class BlockCms extends Module
 				),
 				array(
 					'type' => 'switch',
-					'label' => $this->l('Add store tool link'),
+					'label' => $this->l('Add link to Store Locator'),
 					'name' => 'display_stores',
 					'is_bool' => true,
 					'values' => array(
