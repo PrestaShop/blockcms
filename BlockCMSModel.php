@@ -327,10 +327,10 @@ class BlockCMSModel extends ObjectModel
 	public static function getCMSCategoriesByLocation($location, $id_shop = false)
 	{
 		$context = Context::getContext();
-		$id_shop = ($id_shop !== false) ? $id_shop : $context->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : $context->shop->id;
 
 		$where_shop = '';
-		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false)
 			$where_shop = ' AND ccl.`id_shop` = '.(int)$id_shop;
 
 		$sql = 'SELECT bc.`id_cms_block`, bc.`id_cms_category`, bc.`display_store`, ccl.`link_rewrite`, ccl.`name` category_name, bcl.`name` block_name
@@ -353,10 +353,10 @@ class BlockCMSModel extends ObjectModel
 
 	public static function getCMSPages($id_cms_category, $id_shop = false)
 	{
-		$id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : Context::getContext()->shop->id;
 
 		$where_shop = '';
-		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false)
 			$where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
 
 		$sql = 'SELECT c.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
@@ -377,10 +377,10 @@ class BlockCMSModel extends ObjectModel
 
 	public static function getCMSBlockPages($id_block, $id_shop = false)
 	{
-		$id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : Context::getContext()->shop->id;
 
 		$where_shop = '';
-		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false)
 			$where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
 
 		$sql = 'SELECT cl.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
@@ -417,7 +417,7 @@ class BlockCMSModel extends ObjectModel
 
 	public static function getCMSCategories($recursive = false, $parent = 0, $id_shop = false)
 	{
-		$id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : Context::getContext()->shop->id;
 		$join_shop = '';
 		$where_shop = '';
 
@@ -492,10 +492,10 @@ class BlockCMSModel extends ObjectModel
 	public static function getCMSBlocksByLocation($location, $id_shop = false)
 	{
 		$context = Context::getContext();
-		$id_shop = ($id_shop !== false) ? $id_shop : $context->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : $context->shop->id;
 
 		$where_shop = '';
-		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false)
 			$where_shop = ' AND ccl.`id_shop` = '.$id_shop;
 
 		$sql = 'SELECT bc.`id_cms_block`, bcl.`name` block_name, ccl.`name` category_name, bc.`position`, bc.`id_cms_category`, bc.`display_store`
@@ -535,7 +535,7 @@ class BlockCMSModel extends ObjectModel
 	/* Get all CMS blocks */
 	public static function getAllCMSStructure($id_shop = false)
 	{
-		$id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
+		$id_shop = ($id_shop != false) ? $id_shop : Context::getContext()->shop->id;
 
 		$categories = BlockCMSModel::getCMSCategories(false, 0, $id_shop);
 
