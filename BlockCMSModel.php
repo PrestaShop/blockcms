@@ -327,6 +327,11 @@ class BlockCMSModel extends ObjectModel
 	public static function getCMSCategoriesByLocation($location, $id_shop = false)
 	{
 		$context = Context::getContext();
+		$id_shop = ($id_shop !== false) ? $id_shop : $context->shop->id;
+
+		$where_shop = '';
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+			$where_shop = ' AND ccl.`id_shop` = '.(int)$id_shop;
 
 		$sql = 'SELECT bc.`id_cms_block`, bc.`id_cms_category`, bc.`display_store`, ccl.`link_rewrite`, ccl.`name` category_name, bcl.`name` block_name
 			FROM `'._DB_PREFIX_.'cms_block` bc
@@ -339,7 +344,8 @@ class BlockCMSModel extends ObjectModel
 			WHERE bc.`location` = '.(int)$location.'
 			AND ccl.`id_lang` = '.(int)$context->language->id.'
 			AND bcl.`id_lang` = '.(int)$context->language->id.'
-			AND bcs.id_shop = '.($id_shop ? (int)$id_shop : (int)$context->shop->id).'
+			AND bcs.id_shop = '.($id_shop ? (int)$id_shop : (int)$context->shop->id).
+			$where_shop.'
 			ORDER BY `position`';
 
 		return Db::getInstance()->executeS($sql);
@@ -373,6 +379,10 @@ class BlockCMSModel extends ObjectModel
 	{
 		$id_shop = ($id_shop !== false) ? $id_shop : Context::getContext()->shop->id;
 
+		$where_shop = '';
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+			$where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
+
 		$sql = 'SELECT cl.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
 			FROM `'._DB_PREFIX_.'cms_block_page` bcp
 			INNER JOIN `'._DB_PREFIX_.'cms_lang` cl
@@ -383,7 +393,8 @@ class BlockCMSModel extends ObjectModel
 			ON (c.`id_cms` = cs.`id_cms`)
 			WHERE bcp.`id_cms_block` = '.(int)$id_block.'
 			AND cs.`id_shop` = '.(int)$id_shop.'
-			AND cl.`id_lang` = '.(int)Context::getContext()->language->id.'
+			AND cl.`id_lang` = '.(int)Context::getContext()->language->id.
+			$where_shop.'
 			AND bcp.`is_category` = 0
 			AND c.`active` = 1
 			ORDER BY `position`';
