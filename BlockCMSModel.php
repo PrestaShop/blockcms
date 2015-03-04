@@ -492,6 +492,11 @@ class BlockCMSModel extends ObjectModel
 	public static function getCMSBlocksByLocation($location, $id_shop = false)
 	{
 		$context = Context::getContext();
+		$id_shop = ($id_shop !== false) ? $id_shop : $context->shop->id;
+
+		$where_shop = '';
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true)
+			$where_shop = ' AND ccl.`id_shop` = '.$id_shop;
 
 		$sql = 'SELECT bc.`id_cms_block`, bcl.`name` block_name, ccl.`name` category_name, bc.`position`, bc.`id_cms_category`, bc.`display_store`
 			FROM `'._DB_PREFIX_.'cms_block` bc
@@ -503,8 +508,9 @@ class BlockCMSModel extends ObjectModel
 			ON (bc.`id_cms_block` = bcl.`id_cms_block`)
 			WHERE ccl.`id_lang` = '.(int)Context::getContext()->language->id.'
 			AND bcl.`id_lang` = '.(int)Context::getContext()->language->id.'
-			AND bc.`location` = '.(int)$location.'
-			AND bcs.id_shop = '.($id_shop ? (int)$id_shop : (int)$context->shop->id).'
+			AND bc.`location` = '.(int)$location.
+			$where_shop.'
+			AND bcs.id_shop = '.$id_shop.'
 			ORDER BY bc.`position`';
 
 		return Db::getInstance()->executeS($sql);
