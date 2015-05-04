@@ -171,7 +171,7 @@ class BlockCms extends Module
 	protected function displayForm()
 	{
 		$this->context->controller->addJqueryPlugin('tablednd');
-		$this->context->controller->addJS(_PS_JS_DIR_.'admin-dnd.js');
+		$this->context->controller->addJS(_PS_JS_DIR_.'admin/dnd.js');
 
 		$current_index = AdminController::$currentIndex;
 		$token = Tools::getAdminTokenLite('AdminModules');
