@@ -32,8 +32,8 @@ include_once(dirname(__FILE__) . '/BlockCMSModel.php');
 
 class BlockCms extends Module
 {
-	private $_html;
-	private $_display;
+	protected $_html;
+	protected $_display;
 
 	public function __construct()
 	{
@@ -545,7 +545,7 @@ class BlockCms extends Module
 		return;
 	}
 
-	private function initForm()
+	protected function initForm()
 	{
 		$helper = new HelperForm();
 
@@ -663,7 +663,7 @@ class BlockCms extends Module
 		return true;
 	}
 
-	private function _postProcess()
+	protected function _postProcess()
 	{
 		if ($this->_postValidation() == false)
 			return false;
