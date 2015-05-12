@@ -319,6 +319,7 @@ class BlockCMSModel extends ObjectModel
 			ON (cl.`id_cms` = c.`id_cms`)
 			WHERE cl.`id_cms` = '.(int)$id.'
 			AND (c.`active` = 1 OR c.`id_cms` = 1)
+			AND cl.`id_shop` = '.(int)Context::getContext()->shop->id.'
 			AND cl.`id_lang` = '.(int)Context::getContext()->language->id;
 
 		return Db::getInstance()->getRow($sql);
