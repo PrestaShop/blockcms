@@ -763,7 +763,7 @@ class BlockCms extends Module
 			Configuration::updateValue('FOOTER_CONTACT', (int)Tools::getValue('cms_footer_display_contact_on'));
 			Configuration::updateValue('FOOTER_SITEMAP', (int)Tools::getValue('cms_footer_display_sitemap_on'));
 
-			$this->_html .= $this->displayConfirmation($this->l('Update your footer\'s information.'));
+			$this->_html .= $this->displayConfirmation($this->l('Your footer information has been updated.'));
 		}
 		elseif (Tools::isSubmit('addBlockCMSConfirmation'))
 			$this->_html .= $this->displayConfirmation($this->l('CMS block added.'));
