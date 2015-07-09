@@ -117,20 +117,11 @@
 											<td>{$cms_block['block_name']}</td>
 											<td>{$cms_block['category_name']}</td>
 											<td class="center pointer dragHandle" id="td_{$key%2}_{$cms_block['id_cms_block']}">
-												<a
-													{if (($key == (sizeof($cms_blocks_position) - 1)) || (sizeof($cms_blocks_position) == 1))}
-															style="display: none;"
-													{/if}
-															href="{$current}&amp;configure=blockcms&amp;id_cms_block={$cms_block['id_cms_block']}&amp;way=1&amp;position={(int)$cms_block['position'] + 1}&location=0&amp;token={$token}">
-													<img src="{$smarty.const._PS_ADMIN_IMG_}down.gif" alt="{l s='Down' mod='blockcms'}" title="{l s='Down' mod='blockcms'}" />
-												</a>
-												<a
-													{if (($cms_block['position'] == 0) || ($key == 0))}
-															style="display: none;"
-													{/if}
-															href="{$current}&amp;configure=blockcms&amp;id_cms_block={$cms_block['id_cms_block']}&amp;way=0&amp;position={(int)$cms_block['position'] - 1}&amp;location=0&amp;token={$token}">
-													<img src="{$smarty.const._PS_ADMIN_IMG_}up.gif" alt="{l s='Up' mod='blockcms'}" title="{l s='Up' mod='blockcms'}" />
-												</a>
+												<div class="dragGroup">
+													<div class="positions">
+														{$cms_block['position'] + 1}
+													</div>
+												</div>
 											</td>
 											<td>
 												<div class="btn-group-action">
