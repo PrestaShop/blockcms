@@ -314,7 +314,7 @@ class BlockCMSModel extends ObjectModel
 	public static function getCMSMetaTitle($id)
 	{
 		$context = Context::getContext();
-		$id_shop = ($id_shop != false) ? $id_shop : (int)$context->shop->id;
+		$id_shop = (int)$context->shop->id;
 
 		$where_shop = '';
 		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false) {
