@@ -313,13 +313,21 @@ class BlockCMSModel extends ObjectModel
 
 	public static function getCMSMetaTitle($id)
 	{
+		$context = Context::getContext();
+		$id_shop = (int)$context->shop->id;
+
+		$where_shop = '';
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false) {
+			$where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
+		}
+			
 		$sql = 'SELECT cl.`meta_title`, cl.`link_rewrite`
 			FROM `'._DB_PREFIX_.'cms_lang` cl
 			INNER JOIN `'._DB_PREFIX_.'cms` c
 			ON (cl.`id_cms` = c.`id_cms`)
 			WHERE cl.`id_cms` = '.(int)$id.'
-			AND (c.`active` = 1 OR c.`id_cms` = 1)
-			AND cl.`id_shop` = '.(int)Context::getContext()->shop->id.'
+			AND (c.`active` = 1 OR c.`id_cms` = 1)'.
+			$where_shop.'
 			AND cl.`id_lang` = '.(int)Context::getContext()->language->id;
 
 		return Db::getInstance()->getRow($sql);
