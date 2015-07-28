@@ -300,12 +300,20 @@ class BlockCMSModel extends ObjectModel
 
 	public static function getBlockMetaTitle($id)
 	{
-		$sql = 'SELECT cl.`name`, cl.`link_rewrite`
-			FROM `'._DB_PREFIX_.'cms_category_lang` cl
-			INNER JOIN `'._DB_PREFIX_.'cms_category` c
-			ON (cl.`id_cms_category` = c.`id_cms_category`)
-			WHERE cl.`id_cms_category` = '.(int)$id.'
-			AND (c.`active` = 1 OR c.`id_cms_category` = 1)
+		if (Tools::version_compare(_PS_VERSION_, '1.6.0.14', '<') == true ) {
+			$left_join = 'INNER JOIN `'._DB_PREFIX_.'cms_shop` cs ON (cl.`id_cms` = cs.`id_cms`)';
+			$id_shop = 'AND cs.id_shop = '.(int)Context::getContext()->shop->id.' ';
+		} else {
+			$left_join = '';
+			$id_shop = 'AND cl.id_shop = '.(int)Context::getContext()->shop->id.' ';
+		}
+		$sql = 'SELECT cl.`meta_title`, cl.`link_rewrite`
+			FROM `'._DB_PREFIX_.'cms_lang` cl
+			INNER JOIN `'._DB_PREFIX_.'cms` c ON (cl.`id_cms` = c.`id_cms`)
+			'.$left_join.'
+			WHERE cl.`id_cms` = '.(int)$id.'
+			AND (c.`active` = 1 OR c.`id_cms` = 1)
+			'.$id_shop.'
 			AND cl.`id_lang` = '.(int)Context::getContext()->language->id;
 
 		return Db::getInstance()->getRow($sql);
