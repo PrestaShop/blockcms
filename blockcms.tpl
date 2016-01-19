@@ -57,7 +57,7 @@
 	{/foreach}
 	<!-- /Block CMS module -->
 {else}
-	<!-- MODULE Block footer -->
+	<!-- Block CMS module footer -->
 	<div class="block_various_links" id="block_various_links_footer">
 		<h4 class="title_block">{l s='Information' mod='blockcms'}</h4>
 		<ul>
@@ -104,5 +104,5 @@
 		</ul>
 		{$footer_text}
 	</div>
-	<!-- /MODULE Block footer -->
+	<!-- /Block CMS module footer -->
 {/if}
