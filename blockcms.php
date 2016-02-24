@@ -55,42 +55,29 @@ class blockcms extends Module
 
     public function install()
     {
-        if (!parent::install()
-            || !$this->registerHook('leftColumn')
-            || !$this->registerHook('rightColumn')
-            || !$this->registerHook('header')
-            || !$this->registerHook('footer')
-            || !$this->registerHook('actionObjectCmsUpdateAfter')
-            || !$this->registerHook('actionObjectCmsDeleteAfter')
-            || !$this->registerHook('actionShopDataDuplication')
-            || !$this->registerHook('actionAdminStoresControllerUpdate_optionsAfter')
-            || !BlockCMSModel::createTables()
-            || !Configuration::updateValue('FOOTER_CMS', '')
-            || !Configuration::updateValue('FOOTER_BLOCK_ACTIVATION', 1)
-            || !Configuration::updateValue('FOOTER_POWEREDBY', 1)
-            || !Configuration::updateValue('FOOTER_PRICE-DROP', 1)
-            || !Configuration::updateValue('FOOTER_NEW-PRODUCTS', 1)
-            || !Configuration::updateValue('FOOTER_BEST-SALES', 1)
-            || !Configuration::updateValue('FOOTER_CONTACT', 1)
-            || !Configuration::updateValue('FOOTER_SITEMAP', 1)
-        ) {
-            return false;
-        }
-
         $this->_clearCache('blockcms.tpl');
 
+        $result = parent::install()
+            && $this->installTab()
+            && $this->registerHook('leftColumn')
+            && $this->registerHook('rightColumn')
+            && $this->registerHook('header')
+            && $this->registerHook('footer')
+            && $this->registerHook('actionObjectCmsUpdateAfter')
+            && $this->registerHook('actionObjectCmsDeleteAfter')
+            && $this->registerHook('actionShopDataDuplication')
+            && $this->registerHook('actionAdminStoresControllerUpdate_optionsAfter')
+            && BlockCMSModel::createTables();
+
+
+
         // Install fixtures for blockcms
-        $default = Db::getInstance()->insert('cms_block', array(
+        $result &= Db::getInstance()->insert('cms_block', array(
             'id_cms_category' =>    1,
             'location' =>            0,
             'position' =>            0,
         ));
 
-        if (!$default) {
-            return false;
-        }
-
-        $result = true;
         $id_cms_block = Db::getInstance()->Insert_ID();
         $shops = Shop::getShops(true, null, true);
 
@@ -125,20 +112,30 @@ class blockcms extends Module
     public function uninstall()
     {
         $this->_clearCache('blockcms.tpl');
-        if (!parent::uninstall() ||
-            !BlockCMSModel::DropTables() ||
-            !Configuration::deleteByName('FOOTER_CMS') ||
-            !Configuration::deleteByName('FOOTER_BLOCK_ACTIVATION') ||
-            !Configuration::deleteByName('FOOTER_POWEREDBY') ||
-            !Configuration::deleteByName('FOOTER_PRICE-DROP') ||
-            !Configuration::deleteByName('FOOTER_NEW-PRODUCTS') ||
-            !Configuration::deleteByName('FOOTER_BEST-SALES') ||
-            !Configuration::deleteByName('FOOTER_CONTACT') ||
-            !Configuration::deleteByName('FOOTER_SITEMAP')
-        ) {
-            return false;
-        }
-        return true;
+
+        return parent::uninstall()
+            && $this->uninstallTab()
+            && BlockCMSModel::DropTables();
+    }
+
+    public function installTab()
+    {
+		$tab = new Tab();
+		$tab->active = 1;
+		$tab->class_name = "AdminLinkWidget";
+		$tab->name = array();
+		foreach (Language::getLanguages(true) as $lang)
+			$tab->name[$lang['id_lang']] = "Link Widget";
+		$tab->id_parent = (int)Tab::getIdFromClassName('AdminThemes');
+		$tab->module = $this->name;
+		return $tab->add();
+    }
+
+    public function uninstallTab()
+    {
+        $id_tab = (int)Tab::getIdFromClassName('AdminLinkWidget');
+        $tab = new Tab($id_tab);
+        return $tab->delete();
     }
 
     public function initToolbar()

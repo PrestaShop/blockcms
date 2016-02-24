@@ -27,7 +27,7 @@
 
 {block name="label"}
 	{if $input.type == 'cms_blocks'}
-		
+
 	{else}
 		{$smarty.block.parent}
 	{/if}
