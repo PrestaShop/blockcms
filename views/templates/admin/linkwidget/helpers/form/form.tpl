@@ -52,34 +52,6 @@
 	</h3>
 {/block}
 
-{block name="input"}
-	{if $input.type == 'select_category'}
-		{function name=render_select level=0}
-			{foreach $items as $item}
-				{if (isset($item['id_cms_category']))}
-					<option id="category_{$item['id_cms_category']}" value="{$item['id_cms_category']}"
-						{if (isset($fields_value['id_category']) && ($item['id_cms_category'] == $fields_value['id_category']))}
-							selected
-						{/if} >
-						{str_repeat('-', $level)|cat:$item['name']}
-					</option>
-					{if isset($item['sub_categories']) && count($item['sub_categories']) > 0}
-						{call name=render_select items=$item['sub_categories'] level=$level+1}
-					{/if}
-				{/if}
-			{/foreach}
-		{/function}
-		{if isset($input.options.query) && count($input.options.query) > 0}
-			{assign var=categories value=$input.options.query}
-			<select class="form-control fixed-width-xl" id="{$input.name}" name="{$input.name}">
-				{call render_select items=$categories}
-			</select>
-		{/if}
-	{else}
-		{$smarty.block.parent}
-	{/if}
-{/block}
-
 {block name="input_row"}
 	{if $input.type == 'cms_blocks'}
 		<div class="row">

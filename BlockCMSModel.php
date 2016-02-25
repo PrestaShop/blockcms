@@ -28,17 +28,9 @@ class BlockCMSModel extends ObjectModel
 {
     public $id_cms_block;
 
-    public $id_cms_category;
-
     public $id_hook;
 
     public $position;
-
-    public $display_store;
-
-    const LEFT_COLUMN = 0;
-    const RIGHT_COLUMN = 1;
-    const FOOTER = 2;
 
     /**
      * @see ObjectModel::$definition
@@ -47,11 +39,10 @@ class BlockCMSModel extends ObjectModel
         'table' => 'cms_block',
         'primary' => 'id_cms_block',
         'fields' => array(
-            'id_cms_block' =>       array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'id_cms_category' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'd_hook' =>            array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'position' =>           array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'display_store' =>      array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true)
+            'id_cms_block' =>  array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
+            'id_hook' =>       array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
+            'position' =>      array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
+            'content' =>       array('type' => self::TYPE_STRING, 'validate' => 'isJson'),
         ),
     );
 
@@ -60,7 +51,6 @@ class BlockCMSModel extends ObjectModel
         return (
             BlockCMSModel::createCMSBlockTable() &&
             BlockCMSModel::createCMSBlockLangTable() &&
-            BlockCMSModel::createCMSBlockPageTable() &&
             BlockCMSModel::createCMSBlockShopTable()
         );
     }
@@ -69,7 +59,6 @@ class BlockCMSModel extends ObjectModel
     {
         $sql = 'DROP TABLE
 			`'._DB_PREFIX_.'cms_block`,
-			`'._DB_PREFIX_.'cms_block_page`,
 			`'._DB_PREFIX_.'cms_block_lang`,
 			`'._DB_PREFIX_.'cms_block_shop`';
 
@@ -80,10 +69,9 @@ class BlockCMSModel extends ObjectModel
     {
         $sql = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'cms_block`(
 			`id_cms_block` int(10) unsigned NOT NULL auto_increment,
-			`id_cms_category` int(10) unsigned NOT NULL,
 			`id_hook` int(1) unsigned DEFAULT NULL,
 			`position` int(10) unsigned NOT NULL default \'0\',
-			`display_store` tinyint(1) unsigned NOT NULL default \'1\',
+			`content` text default MULL,
 			PRIMARY KEY (`id_cms_block`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
 
@@ -97,19 +85,6 @@ class BlockCMSModel extends ObjectModel
 			`id_lang` int(10) unsigned NOT NULL,
 			`name` varchar(40) NOT NULL default \'\',
 			PRIMARY KEY (`id_cms_block`, `id_lang`)
-			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
-
-        return Db::getInstance()->execute($sql);
-    }
-
-    public static function createCMSBlockPageTable()
-    {
-        $sql = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'cms_block_page`(
-			`id_cms_block_page` int(10) unsigned NOT NULL auto_increment,
-			`id_cms_block` int(10) unsigned NOT NULL,
-			`id_cms` int(10) unsigned NOT NULL,
-			`is_category` tinyint(1) unsigned NOT NULL,
-			PRIMARY KEY (`id_cms_block_page`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
 
         return Db::getInstance()->execute($sql);
@@ -493,61 +468,6 @@ class BlockCMSModel extends ObjectModel
         }
 
         return $results;
-    }
-
-    public static function getCMSBlocksSortedByHook($id_shop = null, $id_lang = null)
-    {
-        $id_lang = ($id_lang) ?: (int)Context::getContext()->language->id;
-        $id_shop = ($id_shop) ?: (int)Context::getContext()->shop->id;
-
-        $sql = 'SELECT
-                bc.`id_cms_block`,
-                bcl.`name` as block_name,
-                ccl.`name` as category_name,
-                bc.`id_hook`,
-                h.`name` as hook_name,
-                h.`title` as hook_title,
-                h.`description` as hook_description,
-                bc.`position`,
-                bc.`id_cms_category`,
-                bc.`display_store`
-			FROM `'._DB_PREFIX_.'cms_block` bc
-    			INNER JOIN `'._DB_PREFIX_.'cms_category_lang` ccl
-    			    ON (bc.`id_cms_category` = ccl.`id_cms_category`)
-    			INNER JOIN `'._DB_PREFIX_.'cms_block_lang` bcl
-    			    ON (bc.`id_cms_block` = bcl.`id_cms_block`)
-    			LEFT JOIN `'._DB_PREFIX_.'hook` h
-    			    ON (bc.`id_hook` = h.`id_hook`)
-			WHERE ccl.`id_lang` = '.$id_lang.'
-			    AND bcl.`id_lang` = '.$id_lang.'
-			ORDER BY bc.`position`';
-
-        $blocks = Db::getInstance()->executeS($sql);
-
-        $orderedBlocks = [];
-        foreach ($blocks as $block) {
-            if (!isset($orderedBlocks[$block['id_hook']])) {
-                $id_hook = ($block['id_hook']) ?: 'not_hooked';
-                $orderedBlocks[$id_hook] = [
-                    'id_hook' => $block['id_hook'],
-                    'hook_name' => $block['hook_name'],
-                    'hook_title' => $block['hook_title'],
-                    'hook_description' => $block['hook_description'],
-                    'blocks' => [],
-                ];
-            }
-        }
-
-        foreach ($blocks as $block) {
-            $id_hook = ($block['id_hook']) ?: 'not_hooked';
-            unset($block['id_hook']);
-            unset($block['hook_name']);
-            unset($block['hook_title']);
-            unset($block['hook_description']);
-            $orderedBlocks[$id_hook]['blocks'][] = $block;
-        }
-
-        return $orderedBlocks;
     }
 
     /* Get all CMS blocks */

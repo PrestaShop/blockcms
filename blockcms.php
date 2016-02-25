@@ -29,7 +29,8 @@ if (!defined('_CAN_LOAD_FILES_')) {
     exit;
 }
 
-include_once(dirname(__FILE__) . '/BlockCMSModel.php');
+include_once(__DIR__ . '/BlockCMSModel.php');
+include_once(__DIR__ . '/src/BlockCmsRepository.php');
 
 class blockcms extends Module
 {
@@ -57,7 +58,12 @@ class blockcms extends Module
     {
         $this->_clearCache('blockcms.tpl');
 
-        $result = parent::install()
+        $repository = new BlockCmsRepository(
+            Db::getInstance(),
+            $this->context->shop
+        );
+
+        return parent::install()
             && $this->installTab()
             && $this->registerHook('leftColumn')
             && $this->registerHook('rightColumn')
@@ -67,55 +73,21 @@ class blockcms extends Module
             && $this->registerHook('actionObjectCmsDeleteAfter')
             && $this->registerHook('actionShopDataDuplication')
             && $this->registerHook('actionAdminStoresControllerUpdate_optionsAfter')
-            && BlockCMSModel::createTables();
-
-
-
-        // Install fixtures for blockcms
-        $result &= Db::getInstance()->insert('cms_block', array(
-            'id_cms_category' =>    1,
-            'location' =>            0,
-            'position' =>            0,
-        ));
-
-        $id_cms_block = Db::getInstance()->Insert_ID();
-        $shops = Shop::getShops(true, null, true);
-
-        foreach ($shops as $shop) {
-            $result &= Db::getInstance()->insert('cms_block_shop', array(
-                'id_cms_block' =>    $id_cms_block,
-                'id_shop' =>        $shop
-            ));
-        }
-
-        $languages = Language::getLanguages(false);
-        foreach ($languages  as $lang) {
-            $result &= Db::getInstance()->insert('cms_block_lang', array(
-                'id_cms_block' =>    $id_cms_block,
-                'id_lang' =>        $lang['id_lang'],
-                'name' =>            $this->l('Information'),
-            ));
-        }
-
-        $pages = CMS::getCMSPages(null, 1);
-        foreach ($pages as $cms) {
-            $result &= Db::getInstance()->insert('cms_block_page', array(
-                'id_cms_block' =>    $id_cms_block,
-                'id_cms' =>            $cms['id_cms'],
-                'is_category' =>    0,
-            ));
-        }
-
-        return $result;
+            && $repository->createTables();
     }
 
     public function uninstall()
     {
         $this->_clearCache('blockcms.tpl');
 
+        $repository = new BlockCmsRepository(
+            Db::getInstance(),
+            $this->context->shop
+        );
+
         return parent::uninstall()
             && $this->uninstallTab()
-            && BlockCMSModel::DropTables();
+            && $repository->dropTables();
     }
 
     public function installTab()
@@ -170,391 +142,6 @@ class blockcms extends Module
                 break;
         }
         return $this->toolbar_btn;
-    }
-
-    protected function displayForm()
-    {
-        $this->context->controller->addJqueryPlugin('tablednd');
-
-        if (version_compare(_PS_VERSION_, '1.6.0.11', '>=') === true) {
-            $this->context->controller->addJS(_PS_JS_DIR_.'admin/dnd.js');
-        } else {
-            $this->context->controller->addJS(_PS_JS_DIR_.'admin-dnd.js');
-        }
-
-        $current_index = AdminController::$currentIndex;
-        $token = Tools::getAdminTokenLite('AdminModules');
-
-        $this->_display = 'index';
-
-        $this->fields_form[0]['form'] = array(
-            'legend' => array(
-                'title' => $this->l('CMS block configuration'),
-                'icon' => 'icon-list-alt'
-            ),
-            'input' => array(
-                array(
-                    'type' => 'cms_blocks',
-                    'label' => $this->l('CMS Blocks'),
-                    'name' => 'cms_blocks',
-                    'values' => array(
-                        0 => BlockCMSModel::getCMSBlocksByLocation(BlockCMSModel::LEFT_COLUMN, Shop::getContextShopID()),
-                        1 => BlockCMSModel::getCMSBlocksByLocation(BlockCMSModel::RIGHT_COLUMN, Shop::getContextShopID()))
-                )
-            ),
-            'buttons' => array(
-                'newBlock' => array(
-                    'title' => $this->l('New block'),
-                    'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;addBlockCMS',
-                    'class' => 'pull-right',
-                    'icon' => 'process-icon-new'
-                )
-            )
-        );
-        $this->fields_form[1]['form'] = array(
-            'tinymce' => true,
-            'legend' => array(
-                'title' => $this->l('Configuration of the various links in the footer'),
-                'icon' => 'icon-link'
-            ),
-            'input' => array(
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display various links and information in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'cms_pages',
-                    'label' => $this->l('Footer links'),
-                    'name' => 'footerBox[]',
-                    'values' => BlockCMSModel::getAllCMSStructure(),
-                    'desc' => $this->l('Please mark every page that you want to display in the footer CMS block.')
-                ),
-                array(
-                    'type' => 'textarea',
-                    'label' => $this->l('Footer information'),
-                    'name' => 'footer_text',
-                    'rows' => 5,
-                    'cols' => 60,
-                    'lang' => true
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'PS_STORES_DISPLAY_FOOTER',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "Our stores" link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_display_price-drop',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "Price drop" link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_display_new-products',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "New products" link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_display_best-sales',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "Best sales" link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_display_contact',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "Contact us" link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_display_sitemap',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display sitemap link in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'checkbox',
-                    'name' => 'cms_footer_powered_by',
-                    'values' => array(
-                        'query' => array(
-                            array(
-                                'id' => 'on',
-                                'name' => $this->l('Display "Powered by PrestaShop" in the footer'),
-                                'val' => '1'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                )
-            ),
-            'submit' => array(
-                'name' => 'submitFooterCMS',
-                'title' => $this->l('Save'),
-            )
-        );
-
-        $this->context->controller->getLanguages();
-        $tmp = Configuration::get('FOOTER_CMS');
-        $footer_boxes = explode('|', $tmp);
-
-        if ($footer_boxes && is_array($footer_boxes)) {
-            foreach ($footer_boxes as $key => $value) {
-                $this->fields_value[$value] = true;
-            }
-        }
-
-        $this->fields_value['cms_footer_on'] = Configuration::get('FOOTER_BLOCK_ACTIVATION');
-        $this->fields_value['cms_footer_powered_by_on'] = Configuration::get('FOOTER_POWEREDBY');
-        $this->fields_value['PS_STORES_DISPLAY_FOOTER_on'] = Configuration::get('PS_STORES_DISPLAY_FOOTER');
-        $this->fields_value['cms_footer_display_price-drop_on'] = Configuration::get('FOOTER_PRICE-DROP');
-        $this->fields_value['cms_footer_display_new-products_on'] = Configuration::get('FOOTER_NEW-PRODUCTS');
-        $this->fields_value['cms_footer_display_best-sales_on'] = Configuration::get('FOOTER_BEST-SALES');
-        $this->fields_value['cms_footer_display_contact_on'] = Configuration::get('FOOTER_CONTACT');
-        $this->fields_value['cms_footer_display_sitemap_on'] = Configuration::get('FOOTER_SITEMAP');
-
-        foreach ($this->context->controller->_languages as $language) {
-            $footer_text = Configuration::get('FOOTER_CMS_TEXT_'.$language['id_lang']);
-            $this->fields_value['footer_text'][$language['id_lang']] = $footer_text;
-        }
-
-        $helper = $this->initForm();
-        $helper->submit_action = '';
-        $helper->title = $this->l('CMS Block configuration');
-
-        $helper->fields_value = $this->fields_value;
-        $this->_html .= $helper->generateForm($this->fields_form);
-
-        return;
-    }
-
-    protected function displayAddForm()
-    {
-        $token = Tools::getAdminTokenLite('AdminModules');
-        $back = Tools::safeOutput(Tools::getValue('back', ''));
-        $current_index = AdminController::$currentIndex;
-        if (!isset($back) || empty($back)) {
-            $back = $current_index.'&amp;configure='.$this->name.'&token='.$token;
-        }
-
-        if (Tools::isSubmit('editBlockCMS') && Tools::getValue('id_cms_block')) {
-            $this->_display = 'edit';
-            $id_cms_block = (int)Tools::getValue('id_cms_block');
-            $cmsBlock = BlockCMSModel::getBlockCMS($id_cms_block);
-            $cmsBlockCategories = BlockCMSModel::getCMSBlockPagesCategories($id_cms_block);
-            $cmsBlockPages = BlockCMSModel::getCMSBlockPages(Tools::getValue('id_cms_block'));
-        } else {
-            $this->_display = 'add';
-        }
-
-        $this->fields_form[0]['form'] = array(
-            'tinymce' => true,
-            'legend' => array(
-                'title' => isset($cmsBlock) ? $this->l('Edit the CMS block.') : $this->l('New CMS block'),
-                'icon' => isset($cmsBlock) ? 'icon-edit' : 'icon-plus-square'
-            ),
-            'input' => array(
-                array(
-                    'type' => 'text',
-                    'label' => $this->l('Name of the CMS block'),
-                    'name' => 'block_name',
-                    'lang' => true,
-                    'desc' => $this->l('If you leave this field empty, the block name will use the category name by default.')
-                ),
-                array(
-                    'type' => 'select_category',
-                    'label' => $this->l('CMS category'),
-                    'name' => 'id_category',
-                    'options' => array(
-                        'query' => BlockCMSModel::getCMSCategories(true),
-                        'id' => 'id_cms_category',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Location'),
-                    'name' => 'block_location',
-                    'options' => array(
-                        'query' => array(
-                            array(
-                                'id' => BlockCMSModel::LEFT_COLUMN,
-                                'name' => $this->l('Left column')),
-                            array(
-                                'id' => BlockCMSModel::RIGHT_COLUMN,
-                                'name' => $this->l('Right column')),
-                        ),
-                        'id' => 'id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'switch',
-                    'label' => $this->l('Add link to Store Locator'),
-                    'name' => 'display_stores',
-                    'is_bool' => true,
-                    'values' => array(
-                        array(
-                            'id' => 'display_stores_on',
-                            'value' => 1,
-                            'label' => $this->l('Yes')),
-                        array(
-                            'id' => 'display_stores_off',
-                            'value' => 0,
-                            'label' => $this->l('No')),
-                    ),
-                    'desc' => $this->l('Adds the "Our stores" link at the end of the block.')
-                ),
-                array(
-                    'type' => 'cms_pages',
-                    'label' => $this->l('CMS content'),
-                    'name' => 'cmsBox[]',
-                    'values' => BlockCMSModel::getAllCMSStructure(),
-                    'desc' => $this->l('Please mark every page that you want to display in this block.')
-                ),
-            ),
-            'buttons' => array(
-                'cancelBlock' => array(
-                    'title' => $this->l('Cancel'),
-                    'href' => $back,
-                    'icon' => 'process-icon-cancel'
-                )
-            ),
-            'submit' => array(
-                'name' => 'submitBlockCMS',
-                'title' => $this->l('Save'),
-            )
-        );
-
-        $this->context->controller->getLanguages();
-        foreach ($this->context->controller->_languages as $language) {
-            if (Tools::getValue('block_name_'.$language['id_lang'])) {
-                $this->fields_value['block_name'][$language['id_lang']] = Tools::getValue('block_name_'.$language['id_lang']);
-            } elseif (isset($cmsBlock) && isset($cmsBlock[$language['id_lang']]['name'])) {
-                $this->fields_value['block_name'][$language['id_lang']] = $cmsBlock[$language['id_lang']]['name'];
-            } else {
-                $this->fields_value['block_name'][$language['id_lang']] = '';
-            }
-        }
-
-        if (Tools::getValue('display_stores')) {
-            $this->fields_value['display_stores'] = Tools::getValue('display_stores');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['display_store'])) {
-            $this->fields_value['display_stores'] = $cmsBlock[1]['display_store'];
-        } else {
-            $this->fields_value['display_stores'] = '';
-        }
-
-        if (Tools::getValue('id_category')) {
-            $this->fields_value['id_category'] = (int)Tools::getValue('id_category');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['id_cms_category'])) {
-            $this->fields_value['id_category'] = $cmsBlock[1]['id_cms_category'];
-        }
-
-        if (Tools::getValue('block_location')) {
-            $this->fields_value['block_location'] = Tools::getValue('block_location');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['location'])) {
-            $this->fields_value['block_location'] = $cmsBlock[1]['location'];
-        } else {
-            $this->fields_value['block_location'] = 0;
-        }
-
-        if ($cmsBoxes = Tools::getValue('cmsBox')) {
-            foreach ($cmsBoxes as $key => $value) {
-                $this->fields_value[$value] = true;
-            }
-        } else {
-            if (isset($cmsBlockPages) && is_array($cmsBlockPages) && count($cmsBlockPages) > 0) {
-                foreach ($cmsBlockPages as $item) {
-                    $this->fields_value['0_'.$item['id_cms']] = true;
-                }
-            }
-            if (isset($cmsBlockCategories) && is_array($cmsBlockCategories) && count($cmsBlockCategories) > 0) {
-                foreach ($cmsBlockCategories as $item) {
-                    $this->fields_value['1_'.$item['id_cms']] = true;
-                }
-            }
-        }
-
-        $helper = $this->initForm();
-
-        if (isset($id_cms_block)) {
-            $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name.'&id_cms_block='.$id_cms_block;
-            $helper->submit_action = 'editBlockCMS';
-        } else {
-            $helper->submit_action = 'addBlockCMS';
-        }
-
-        $helper->fields_value = isset($this->fields_value) ? $this->fields_value : array();
-        $this->_html .= $helper->generateForm($this->fields_form);
-
-        return;
     }
 
     protected function initForm()
@@ -754,31 +341,12 @@ class blockcms extends Module
             } else {
                 $this->_html .= $this->displayError($this->l('Error: You are trying to delete a non-existing CMS block.'));
             }
-        } elseif (Tools::isSubmit('submitFooterCMS')) {
-            $powered_by = Tools::getValue('cms_footer_powered_by_on') ? 1 : 0;
-            $footer_boxes = Tools::getValue('footerBox') ? implode('|', Tools::getValue('footerBox')) : '';
-            $block_activation = (Tools::getValue('cms_footer_on') == 1) ? 1 : 0;
-
-            Configuration::updateValue('PS_STORES_DISPLAY_FOOTER', Tools::getValue('PS_STORES_DISPLAY_FOOTER_on'));
-            Configuration::updateValue('FOOTER_CMS', rtrim($footer_boxes, '|'));
-            Configuration::updateValue('FOOTER_POWEREDBY', $powered_by);
-            Configuration::updateValue('FOOTER_BLOCK_ACTIVATION', $block_activation);
-
-            Configuration::updateValue('FOOTER_PRICE-DROP', (int)Tools::getValue('cms_footer_display_price-drop_on'));
-            Configuration::updateValue('FOOTER_NEW-PRODUCTS', (int)Tools::getValue('cms_footer_display_new-products_on'));
-            Configuration::updateValue('FOOTER_BEST-SALES', (int)Tools::getValue('cms_footer_display_best-sales_on'));
-            Configuration::updateValue('FOOTER_CONTACT', (int)Tools::getValue('cms_footer_display_contact_on'));
-            Configuration::updateValue('FOOTER_SITEMAP', (int)Tools::getValue('cms_footer_display_sitemap_on'));
-
-            $this->_html .= $this->displayConfirmation($this->l('Your footer information has been updated.'));
         } elseif (Tools::isSubmit('addBlockCMSConfirmation')) {
             $this->_html .= $this->displayConfirmation($this->l('CMS block added.'));
         } elseif (Tools::isSubmit('editBlockCMSConfirmation')) {
             $this->_html .= $this->displayConfirmation($this->l('CMS block edited.'));
         } elseif (Tools::isSubmit('deleteBlockCMSConfirmation')) {
             $this->_html .= $this->displayConfirmation($this->l('Deletion successful.'));
-        } elseif (Tools::isSubmit('id_cms_block') && Tools::isSubmit('way') && Tools::isSubmit('position') && Tools::isSubmit('location')) {
-            $this->changePosition();
         } elseif (Tools::isSubmit('updatePositions')) {
             $this->updatePositionsDnd();
         }
@@ -791,16 +359,9 @@ class blockcms extends Module
 
     public function getContent()
     {
-        $this->_html = '';
-        $this->_postProcess();
-
-        if (Tools::isSubmit('addBlockCMS') || Tools::isSubmit('editBlockCMS')) {
-            $this->displayAddForm();
-        } else {
-            $this->displayForm();
-        }
-
-        return $this->_html;
+        Tools::redirectAdmin(
+            $this->context->link->getAdminLink('AdminLinkWidget')
+        );
     }
 
     public function displayBlockCMS($column)
