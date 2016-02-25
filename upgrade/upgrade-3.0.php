@@ -15,5 +15,12 @@ function upgrade_module_3_0($object)
     Configuration::deleteByName('FOOTER_CONTACT');
     Configuration::deleteByName('FOOTER_SITEMAP');
 
+    Db::getInstance()->executeS('
+        ALTER TABLE '._DB_PREFIX_.'cms_block ADD COLUMN `id_hook` int(1) unsigned DEFAULT NULL AFTER `location`
+    ');
+    Db::getInstance()->executeS('
+        ALTER TABLE '._DB_PREFIX_.'cms_block DROP COLUMN `location`
+    ');
+
     return true;
 }

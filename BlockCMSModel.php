@@ -30,7 +30,7 @@ class BlockCMSModel extends ObjectModel
 
     public $id_cms_category;
 
-    public $location;
+    public $id_hook;
 
     public $position;
 
@@ -49,7 +49,7 @@ class BlockCMSModel extends ObjectModel
         'fields' => array(
             'id_cms_block' =>       array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
             'id_cms_category' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'location' =>            array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
+            'd_hook' =>            array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
             'position' =>           array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
             'display_store' =>      array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true)
         ),
@@ -81,7 +81,7 @@ class BlockCMSModel extends ObjectModel
         $sql = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'cms_block`(
 			`id_cms_block` int(10) unsigned NOT NULL auto_increment,
 			`id_cms_category` int(10) unsigned NOT NULL,
-			`location` tinyint(1) unsigned NOT NULL,
+			`id_hook` int(1) unsigned DEFAULT NULL,
 			`position` int(10) unsigned NOT NULL default \'0\',
 			`display_store` tinyint(1) unsigned NOT NULL default \'1\',
 			PRIMARY KEY (`id_cms_block`)
@@ -126,10 +126,10 @@ class BlockCMSModel extends ObjectModel
         return Db::getInstance()->execute($sql);
     }
 
-    public static function insertCMSBlock($id_category, $location, $position, $display_store)
+    public static function insertCMSBlock($id_category, $id_hook, $position, $display_store)
     {
-        $sql = 'INSERT INTO `'._DB_PREFIX_.'cms_block` (`id_cms_category`, `location`, `position`, `display_store`)
-			VALUES('.(int)$id_category.', '.(int)$location.', '.(int)$position.', '.(int)$display_store.')';
+        $sql = 'INSERT INTO `'._DB_PREFIX_.'cms_block` (`id_cms_category`, `id_hook`, `position`, `display_store`)
+			VALUES('.(int)$id_category.', '.(int)$id_hook.', '.(int)$position.', '.(int)$display_store.')';
 
         if (Db::getInstance()->execute($sql)) {
             return Db::getInstance()->Insert_ID();
@@ -168,10 +168,10 @@ class BlockCMSModel extends ObjectModel
         return Db::getInstance()->Insert_ID();
     }
 
-    public static function updateCMSBlock($id_cms_block, $id_cms_category, $position, $location, $display_store)
+    public static function updateCMSBlock($id_cms_block, $id_cms_category, $position, $id_hook, $display_store)
     {
         $sql = 'UPDATE `'._DB_PREFIX_.'cms_block`
-			SET `location` = '.(int)$location.',
+			SET `id_hook` = '.(int)$id_hook.',
 			`id_cms_category` = '.(int)$id_cms_category.',
 			`position` = '.(int)$position.',
 			`display_store` = '.(int)$display_store.'
@@ -180,21 +180,21 @@ class BlockCMSModel extends ObjectModel
         Db::getInstance()->execute($sql);
     }
 
-    public static function updatePositions($position, $new_position, $location)
+    public static function updatePositions($position, $new_position, $id_hook)
     {
         $sql = 'UPDATE `'._DB_PREFIX_.'cms_block`
 			SET `position` = '.(int)$new_position.' WHERE `position` > '.(int)$position.'
-			AND `location` = '.(int)$location;
+			AND `id_hook` = '.(int)$id_hook;
 
         Db::getInstance()->execute($sql);
     }
 
-    public static function updateCMSBlockPositions($id_cms_block, $position, $new_position, $location)
+    public static function updateCMSBlockPositions($id_cms_block, $position, $new_position, $id_hook)
     {
         $query = 'UPDATE `'._DB_PREFIX_.'cms_block`
 			SET `position` = '.(int)$new_position.'
 			WHERE `position` = '.(int)$position.'
-			AND `location` = '.(int)$location;
+			AND `id_hook` = '.(int)$id_hook;
 
         $sub_query = 'UPDATE `'._DB_PREFIX_.'cms_block`
 			SET `position` = '.(int)$position.'
@@ -248,11 +248,11 @@ class BlockCMSModel extends ObjectModel
         Db::getInstance()->execute($sql);
     }
 
-    public static function getMaxPosition($location)
+    public static function getMaxPosition($id_hook)
     {
         $sql = 'SELECT COUNT(*)
 			FROM `'._DB_PREFIX_.'cms_block`
-			WHERE `location` = '.(int)$location;
+			WHERE `id_hook` = '.(int)$id_hook;
 
         return Db::getInstance()->getValue($sql);
     }
@@ -319,7 +319,7 @@ class BlockCMSModel extends ObjectModel
         if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false) {
             $where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
         }
-            
+
         $sql = 'SELECT cl.`meta_title`, cl.`link_rewrite`
 			FROM `'._DB_PREFIX_.'cms_lang` cl
 			INNER JOIN `'._DB_PREFIX_.'cms` c
@@ -332,7 +332,7 @@ class BlockCMSModel extends ObjectModel
         return Db::getInstance()->getRow($sql);
     }
 
-    public static function getCMSCategoriesByLocation($location, $id_shop = false)
+    public static function getCMSCategoriesByHook($id_hook, $id_shop = false)
     {
         $context = Context::getContext();
         $id_shop = ($id_shop != false) ? $id_shop : $context->shop->id;
@@ -350,7 +350,7 @@ class BlockCMSModel extends ObjectModel
 			ON (bc.`id_cms_category` = ccl.`id_cms_category`)
 			INNER JOIN `'._DB_PREFIX_.'cms_block_lang` bcl
 			ON (bc.`id_cms_block` = bcl.`id_cms_block`)
-			WHERE bc.`location` = '.(int)$location.'
+			WHERE bc.`id_hook` = '.(int)$id_hook.'
 			AND ccl.`id_lang` = '.(int)$context->language->id.'
 			AND bcl.`id_lang` = '.(int)$context->language->id.'
 			AND bcs.id_shop = '.($id_shop ? (int)$id_shop : (int)$context->shop->id).
@@ -479,7 +479,7 @@ class BlockCMSModel extends ObjectModel
     /* Get a single CMS block by its ID */
     public static function getBlockCMS($id_cms_block)
     {
-        $sql = 'SELECT cb.`id_cms_category`, cb.`location`, cb.`position`, cb.`display_store`, cbl.id_lang, cbl.name
+        $sql = 'SELECT cb.`id_cms_category`, cb.`id_hook`, cb.`position`, cb.`display_store`, cbl.id_lang, cbl.name
 			FROM `'._DB_PREFIX_.'cms_block` cb
 			LEFT JOIN `'._DB_PREFIX_.'cms_block_lang` cbl
 			ON (cbl.`id_cms_block` = cb.`id_cms_block`)
@@ -495,49 +495,59 @@ class BlockCMSModel extends ObjectModel
         return $results;
     }
 
-    /* Get all CMS blocks by location */
-    public static function getCMSBlocksByLocation($location, $id_shop = false)
+    public static function getCMSBlocksSortedByHook($id_shop = null, $id_lang = null)
     {
-        $context = Context::getContext();
-        $id_shop = ($id_shop != false) ? $id_shop : $context->shop->id;
+        $id_lang = ($id_lang) ?: (int)Context::getContext()->language->id;
+        $id_shop = ($id_shop) ?: (int)Context::getContext()->shop->id;
 
-        $where_shop = '';
-        if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false) {
-            $where_shop = ' AND ccl.`id_shop` = '.$id_shop;
+        $sql = 'SELECT
+                bc.`id_cms_block`,
+                bcl.`name` as block_name,
+                ccl.`name` as category_name,
+                bc.`id_hook`,
+                h.`name` as hook_name,
+                h.`title` as hook_title,
+                h.`description` as hook_description,
+                bc.`position`,
+                bc.`id_cms_category`,
+                bc.`display_store`
+			FROM `'._DB_PREFIX_.'cms_block` bc
+    			INNER JOIN `'._DB_PREFIX_.'cms_category_lang` ccl
+    			    ON (bc.`id_cms_category` = ccl.`id_cms_category`)
+    			INNER JOIN `'._DB_PREFIX_.'cms_block_lang` bcl
+    			    ON (bc.`id_cms_block` = bcl.`id_cms_block`)
+    			LEFT JOIN `'._DB_PREFIX_.'hook` h
+    			    ON (bc.`id_hook` = h.`id_hook`)
+			WHERE ccl.`id_lang` = '.$id_lang.'
+			    AND bcl.`id_lang` = '.$id_lang.'
+			ORDER BY bc.`position`';
+
+        $blocks = Db::getInstance()->executeS($sql);
+
+        $orderedBlocks = [];
+        foreach ($blocks as $block) {
+            if (!isset($orderedBlocks[$block['id_hook']])) {
+                $id_hook = ($block['id_hook']) ?: 'not_hooked';
+                $orderedBlocks[$id_hook] = [
+                    'id_hook' => $block['id_hook'],
+                    'hook_name' => $block['hook_name'],
+                    'hook_title' => $block['hook_title'],
+                    'hook_description' => $block['hook_description'],
+                    'blocks' => [],
+                ];
+            }
         }
 
-        $sql = 'SELECT bc.`id_cms_block`, bcl.`name` block_name, ccl.`name` category_name, bc.`position`, bc.`id_cms_category`, bc.`display_store`
-			FROM `'._DB_PREFIX_.'cms_block` bc
-			LEFT JOIN `'._DB_PREFIX_.'cms_block_shop` bcs
-			ON (bcs.id_cms_block = bc.id_cms_block)
-			INNER JOIN `'._DB_PREFIX_.'cms_category_lang` ccl
-			ON (bc.`id_cms_category` = ccl.`id_cms_category`)
-			INNER JOIN `'._DB_PREFIX_.'cms_block_lang` bcl
-			ON (bc.`id_cms_block` = bcl.`id_cms_block`)
-			WHERE ccl.`id_lang` = '.(int)Context::getContext()->language->id.'
-			AND bcl.`id_lang` = '.(int)Context::getContext()->language->id.'
-			AND bc.`location` = '.(int)$location.
-            $where_shop.'
-			AND bcs.id_shop = '.$id_shop.'
-			ORDER BY bc.`position`';
+        foreach ($blocks as $block) {
+            $id_hook = ($block['id_hook']) ?: 'not_hooked';
+            unset($block['id_hook']);
+            unset($block['hook_name']);
+            unset($block['hook_title']);
+            unset($block['hook_description']);
+            $orderedBlocks[$id_hook]['blocks'][] = $block;
+        }
 
-        return Db::getInstance()->executeS($sql);
-    }
-
-    /* Get all CMS blocks */
-    public static function getCMSBlocks()
-    {
-        $sql = 'SELECT bc.`id_cms_block`, bcl.`name` block_name, ccl.`name` category_name, bc.`position`, bc.`id_cms_category`, bc.`display_store`
-			FROM `'._DB_PREFIX_.'cms_block` bc
-			INNER JOIN `'._DB_PREFIX_.'cms_category_lang` ccl
-			ON (bc.`id_cms_category` = ccl.`id_cms_category`)
-			INNER JOIN `'._DB_PREFIX_.'cms_block_lang` bcl
-			ON (bc.`id_cms_block` = bcl.`id_cms_block`)
-			WHERE ccl.`id_lang` = '.(int)Context::getContext()->language->id.'
-			AND bcl.`id_lang` = '.(int)Context::getContext()->language->id.'
-			ORDER BY bc.`position`';
-
-        return Db::getInstance()->executeS($sql);
+        return $orderedBlocks;
     }
 
     /* Get all CMS blocks */
@@ -573,11 +583,11 @@ class BlockCMSModel extends ObjectModel
         return $titles;
     }
 
-    public static function getCMSTitles($location, $id_shop = false)
+    public static function getCMSTitles($id_hook, $id_shop = false)
     {
         $content = array();
         $context = Context::getContext();
-        $cmsCategories = BlockCMSModel::getCMSCategoriesByLocation($location, $id_shop);
+        $cmsCategories = BlockCMSModel::getCMSCategoriesByHook($id_hook, $id_shop);
 
         if (is_array($cmsCategories) && count($cmsCategories)) {
             foreach ($cmsCategories as $cmsCategory) {

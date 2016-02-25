@@ -88,68 +88,62 @@
 				var token = '{$token}';
 				var alternate = 1;
 			</script>
-			{assign var=cms_blocks_positions value=$input.values}
-			{if isset($cms_blocks_positions) && count($cms_blocks_positions) > 0}
-				{foreach $cms_blocks_positions as $key => $cms_blocks_position}
-					<div class="col-lg-6">
-						<div class="panel">
-							<div class="panel-heading">
-								{if $key == 0}
-									{l s='Left blocks' mod='blockcms'}
-								{else}
-									{l s='Right blocks' mod='blockcms'}
-								{/if}
-							</div>
-							<table class="table tableDnD cms" id="cms_block_{$key%2}">
-								<thead>
-									<tr class="nodrag nodrop">
-										<th>{l s='ID' mod='blockcms'}</th>
-										<th>{l s='Name of the block' mod='blockcms'}</th>
-										<th>{l s='Category name' mod='blockcms'}</th>
-										<th>{l s='Position' mod='blockcms'}</th>
-										<th></th>
-									</tr>
-								</thead>
-								<tbody>
-									{foreach $cms_blocks_position as $key => $cms_block}
-										<tr class="{if $key%2}alt_row{else}not_alt_row{/if} row_hover" id="tr_{$key%2}_{$cms_block['id_cms_block']}_{$cms_block['position']}">
-											<td>{$cms_block['id_cms_block']}</td>
-											<td>{$cms_block['block_name']}</td>
-											<td>{$cms_block['category_name']}</td>
-											<td class="center pointer dragHandle" id="td_{$key%2}_{$cms_block['id_cms_block']}">
-												<div class="dragGroup">
-													<div class="positions">
-														{$cms_block['position'] + 1}
-													</div>
-												</div>
-											</td>
-											<td>
-												<div class="btn-group-action">
-													<div class="btn-group pull-right">
-														<a class="btn btn-default" href="{$current}&amp;token={$token}&amp;editBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='blockcms'}">
-															<i class="icon-edit"></i> {l s='Edit' mod='blockcms'}
-														</a>
-														<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-															<i class="icon-caret-down"></i>&nbsp;
-														</button>
-														<ul class="dropdown-menu">
-														<li>
-															<a href="{$current}&amp;token={$token}&amp;deleteBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='blockcms'}">
-																<i class="icon-trash"></i> {l s='Delete' mod='blockcms'}
-															</a>
-														</li>
-														</ul>
-													</div>
-												</div>
-											</td>
-										</tr>
-									{/foreach}
-								</tbody>
-							</table>
+			{foreach $input.values as $key => $cms_blocks_position}
+				<div class="col-lg-6">
+					<div class="panel">
+						<div class="panel-heading">
+							{$cms_blocks_position.hook_name}
+              <small>{$cms_blocks_position.hook_title}</small>
 						</div>
+						<table class="table tableDnD cms" id="cms_block_{$key%2}">
+							<thead>
+								<tr class="nodrag nodrop">
+									<th>{l s='ID' mod='blockcms'}</th>
+									<th>{l s='Name of the block' mod='blockcms'}</th>
+									<th>{l s='Category name' mod='blockcms'}</th>
+									<th>{l s='Position' mod='blockcms'}</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{foreach $cms_blocks_position.blocks as $cms_block}
+									<tr class="{if $key%2}alt_row{else}not_alt_row{/if} row_hover" id="tr_{$key%2}_{$cms_block['id_cms_block']}_{$cms_block['position']}">
+										<td>{$cms_block['id_cms_block']}</td>
+										<td>{$cms_block['block_name']}</td>
+										<td>{$cms_block['category_name']}</td>
+										<td class="center pointer dragHandle" id="td_{$key%2}_{$cms_block['id_cms_block']}">
+											<div class="dragGroup">
+												<div class="positions">
+													{$cms_block['position'] + 1}
+												</div>
+											</div>
+										</td>
+										<td>
+											<div class="btn-group-action">
+												<div class="btn-group pull-right">
+													<a class="btn btn-default" href="{$current}&amp;editBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='blockcms'}">
+														<i class="icon-edit"></i> {l s='Edit' mod='blockcms'}
+													</a>
+													<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+														<i class="icon-caret-down"></i>&nbsp;
+													</button>
+													<ul class="dropdown-menu">
+													<li>
+														<a href="{$current}&amp;deleteBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='blockcms'}">
+															<i class="icon-trash"></i> {l s='Delete' mod='blockcms'}
+														</a>
+													</li>
+													</ul>
+												</div>
+											</div>
+										</td>
+									</tr>
+								{/foreach}
+							</tbody>
+						</table>
 					</div>
-				{/foreach}
-			{/if}
+				</div>
+			{/foreach}
 		</div>
 
 	{elseif $input.type == 'cms_pages'}
