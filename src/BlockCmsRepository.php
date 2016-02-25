@@ -110,6 +110,7 @@ class BlockCmsRepository
     {
         $sql = "SELECT h.id_hook as id, h.name as name
                 FROM {$this->db_prefix}hook h
+                WHERE (lower(h.`name`) LIKE 'display%')
                 ORDER BY h.name ASC
             ";
         return $this->db->executeS($sql);
