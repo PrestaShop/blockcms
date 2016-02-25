@@ -114,4 +114,49 @@ class BlockCmsRepository
             ";
         return $this->db->executeS($sql);
     }
+
+    public function getCmsPages($id_lang = null)
+    {
+        $id_lang = ($id_lang) ?: Context::getContext()->language->id;
+
+        $categories = "SELECT  cc.`id_cms_category`,
+                        ccl.`name`,
+                        ccl.`description`,
+                        ccl.`link_rewrite`,
+                        cc.`id_parent`,
+                        cc.`level_depth`,
+                        NULL as pages
+            FROM {$this->db_prefix}cms_category cc
+            INNER JOIN {$this->db_prefix}cms_category_lang ccl
+                ON (cc.`id_cms_category` = ccl.`id_cms_category`)
+            INNER JOIN {$this->db_prefix}cms_category_shop ccs
+                ON (cc.`id_cms_category` = ccs.`id_cms_category`)
+            WHERE `active` = 1
+                AND ccl.`id_lang`= $id_lang
+                AND ccl.`id_shop`= {$this->shop->id}
+        ";
+
+        $pages = $this->db->executeS($categories);
+
+        foreach ($pages as &$category) {
+            $category['pages'] =
+                $this->db->executeS("SELECT c.`id_cms`,
+                        c.`position`,
+                        cl.`meta_title` as title,
+                        cl.`meta_description` as description,
+                        cl.`link_rewrite`
+                    FROM {$this->db_prefix}cms c
+                    INNER JOIN {$this->db_prefix}cms_lang cl
+                        ON (c.`id_cms` = cl.`id_cms`)
+                    INNER JOIN {$this->db_prefix}cms_shop cs
+                        ON (c.`id_cms` = cs.`id_cms`)
+                    WHERE c.`active` = 1
+                        AND c.`id_cms_category` = {$category['id_cms_category']}
+                        AND cl.`id_lang` = $id_lang
+                        AND cs.`id_shop` = {$this->shop->id}
+                ");
+        }
+
+        return $pages;
+    }
 }

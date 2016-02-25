@@ -120,68 +120,46 @@
 
 	{elseif $input.type == 'cms_pages'}
 
-		{assign var=cms value=$input.values}
-		{if isset($cms) && count($cms) > 0}
-			<div class="row">
-				<div class="col-lg-9 col-lg-offset-3">
-					<div class="panel">
-						<div class="panel-heading">
-							{$input.label}
-						</div>
-						<table class="table">
-							<thead>
-								<tr>
-									<th>
-										<input type="checkbox" name="checkme" id="checkme" class="noborder" onclick="checkDelBoxes(this.form, '{$input.name}', this.checked)" />
-									</th>
-									<th>{l s='ID' mod='blockcms'}</th>
-									<th>{l s='Name' mod='blockcms'}</th>
-								</tr>
-							</thead>
-							<tbody>
-								{foreach $cms as $key => $cms_category}
-									<tr {if $key%2}class="alt_row"{/if}>
-										<td>
-											{assign var=id_checkbox value=1|cat:'_'|cat:$cms_category['id_cms_category']}
-											<input type="checkbox" class="cmsBox" name="{$input.name}" id="{$id_checkbox}" value="{$id_checkbox}" {if isset($fields_value[$id_checkbox])}checked="checked"{/if} />
-										</td>
-										<td>
-											{$cms_category['id_cms_category']}
-										</td>
-										<td>
-											<label class="control-label" for="{$id_checkbox}">
-												{if $cms_category['level_depth'] > 0}
-													{str_repeat('- ', ($cms_category['level_depth'] - 1))}
-												{/if}
-												{$cms_category['name']|escape}
-											</label>
-										</td>
-									</tr>
-									{foreach $cms_category['cms_pages'] as $subkey => $cms_page}
-										<tr class="subitem{if ($subkey+$key-1)%2} alt_row{/if}">
-											<td>
-												{assign var=id_checkbox value=0|cat:'_'|cat:$cms_page['id_cms']}
-												<input type="checkbox" class="cmsBox" name="{$input.name}" id="{$id_checkbox}" value="{$id_checkbox}" {if isset($fields_value[$id_checkbox])}checked="checked"{/if} />
-											</td>
-											<td>
-												{$cms_page['id_cms']}
-											</td>
-											<td>
-												<label class="control-label" for="{$id_checkbox}">
-													{str_repeat('- ', $cms_category['level_depth'])|cat:$cms_page['meta_title']}
-												</label>
-											</td>
-										</tr>
-									{/foreach}
-								{/foreach}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-			{else}
-			<p>{l s='No pages have been created.' mod='blockcms'}</p>
-		{/if}
+    {foreach $input.values as $cms_category}
+      <div class="row">
+        <div class="col-lg-9 col-lg-offset-3">
+          <div class="panel">
+            <div class="panel-heading">
+              {$input.label} - {$cms_category.name}
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" name="checkme" id="checkme" class="noborder" onclick="checkDelBoxes(this.form, '{$input.name}', this.checked)" />
+                  </th>
+                  <th>{l s='ID' mod='blockcms'}</th>
+                  <th>{l s='Name' mod='blockcms'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {foreach $cms_category.pages as $key => $page}
+                  <tr {if $key%2}class="alt_row"{/if}>
+                    <td>
+                      <input type="checkbox" class="cmsBox" name="{$input.name}" id="{$page.id_cms}" value="{$page.id_cms}" {if isset($fields_value[$page.id_cms])}checked="checked"{/if} />
+                    </td>
+                    <td class="fixed-width-xs">
+                      {$page.id_cms}
+                    </td>
+                    <td>
+                      <label class="control-label" for="{$page.id_cms}">
+                        {$page.title|escape}
+                      </label>
+                    </td>
+                  </tr>
+                {/foreach}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    {/foreach}
+
 	{else}
 		{$smarty.block.parent}
 	{/if}

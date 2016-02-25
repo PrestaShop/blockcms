@@ -122,7 +122,7 @@ class AdminLinkWidgetController extends ModuleAdminController
                     'type' => 'cms_pages',
                     'label' => $this->l('CMS content'),
                     'name' => 'cmsBox[]',
-                    'values' => BlockCMSModel::getAllCMSStructure(),
+                    'values' => $this->repository->getCmsPages(),
                     'desc' => $this->l('Please mark every page that you want to display in this block.')
                 ),
             ),
