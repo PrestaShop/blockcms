@@ -91,7 +91,7 @@
 										<td>
 											<div class="btn-group-action">
 												<div class="btn-group pull-right">
-													<a class="btn btn-default" href="{$current}&amp;editBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='blockcms'}">
+													<a class="btn btn-default" href="{$current}&amp;edit{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='blockcms'}">
 														<i class="icon-edit"></i> {l s='Edit' mod='blockcms'}
 													</a>
 													<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -99,7 +99,7 @@
 													</button>
 													<ul class="dropdown-menu">
 													<li>
-														<a href="{$current}&amp;deleteBlockCMS&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='blockcms'}">
+														<a href="{$current}&amp;delete{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='blockcms'}">
 															<i class="icon-trash"></i> {l s='Delete' mod='blockcms'}
 														</a>
 													</li>

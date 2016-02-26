@@ -24,9 +24,9 @@ class AdminLinkWidgetController extends ModuleAdminController
 
     public function init()
     {
-        if (Tools::isSubmit('editBlockCMS')) {
+        if (Tools::isSubmit('editCmsBlock')) {
             $this->display = 'edit';
-        } elseif (Tools::isSubmit('addBlockCMS')) {
+        } elseif (Tools::isSubmit('addCmsBlock')) {
             $this->display = 'add';
         }
 
@@ -40,7 +40,7 @@ class AdminLinkWidgetController extends ModuleAdminController
             return false;
         }
 
-        if (Tools::isSubmit('submitBlockCMS')) {
+        if (Tools::isSubmit('submitCmsBlock')) {
             $cmsBlock = new CmsBlock(Tools::getValue('id_cms_block'));
             $cmsBlock->name = Tools::getValue('name');
             $cmsBlock->id_hook = Tools::getValue('id_hook');
@@ -70,7 +70,7 @@ class AdminLinkWidgetController extends ModuleAdminController
             'buttons' => array(
                 'newBlock' => array(
                     'title' => $this->module->l('New block'),
-                    'href' => $this->context->link->getAdminLink('AdminLinkWidget').'&amp;addBlockCMS',
+                    'href' => $this->context->link->getAdminLink('AdminLinkWidget').'&amp;addCmsBlock',
                     'class' => 'pull-right',
                     'icon' => 'process-icon-new'
                 ),
@@ -137,7 +137,7 @@ class AdminLinkWidgetController extends ModuleAdminController
                 )
             ),
             'submit' => array(
-                'name' => 'submitBlockCMS',
+                'name' => 'submitCmsBlock',
                 'title' => $this->l('Save'),
             )
         );
@@ -155,9 +155,9 @@ class AdminLinkWidgetController extends ModuleAdminController
         $helper = $this->buildHelper();
         if (isset($id_cms_block)) {
             $helper->currentIndex = AdminController::$currentIndex.'&id_cms_block='.$id_cms_block;
-            $helper->submit_action = 'editBlockCMS';
+            $helper->submit_action = 'editCmsBlock';
         } else {
-            $helper->submit_action = 'addBlockCMS';
+            $helper->submit_action = 'addCmsBlock';
         }
 
         $helper->fields_value = (array)$cmsBlock;
@@ -171,7 +171,7 @@ class AdminLinkWidgetController extends ModuleAdminController
 
         $helper->module = $this->module;
         $helper->override_folder = 'linkwidget/';
-        $helper->identifier = $this->identifier;
+        $helper->identifier = 'CmsBlock';
         $helper->token = Tools::getAdminTokenLite('AdminLinkWidget');
         $helper->languages = $this->_languages;
         $helper->currentIndex = $this->context->link->getAdminLink('AdminLinkWidget');
