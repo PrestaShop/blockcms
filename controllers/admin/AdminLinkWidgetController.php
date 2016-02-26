@@ -16,7 +16,7 @@ class AdminLinkWidgetController extends ModuleAdminController
 
         $this->name = 'LinkWidget';
 
-        $this->repository = new BlockCmsRepository(
+        $this->repository = new CmsBlockRepository(
             Db::getInstance(),
             $this->context->shop
         );

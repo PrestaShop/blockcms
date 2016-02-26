@@ -58,7 +58,7 @@ class blockcms extends Module
     {
         $this->_clearCache('blockcms.tpl');
 
-        $repository = new BlockCmsRepository(
+        $repository = new CmsBlockRepository(
             Db::getInstance(),
             $this->context->shop
         );
@@ -80,7 +80,7 @@ class blockcms extends Module
     {
         $this->_clearCache('blockcms.tpl');
 
-        $repository = new BlockCmsRepository(
+        $repository = new CmsBlockRepository(
             Db::getInstance(),
             $this->context->shop
         );

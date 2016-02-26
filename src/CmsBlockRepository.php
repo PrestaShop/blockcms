@@ -1,6 +1,6 @@
 <?php
 
-class BlockCmsRepository
+class CmsBlockRepository
 {
     private $db;
     private $shop;
