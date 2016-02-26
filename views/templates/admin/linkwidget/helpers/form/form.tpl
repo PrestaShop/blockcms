@@ -71,9 +71,8 @@
 							<thead>
 								<tr class="nodrag nodrop">
 									<th>{l s='ID' mod='blockcms'}</th>
+                  <th>{l s='Position' mod='blockcms'}</th>
 									<th>{l s='Name of the block' mod='blockcms'}</th>
-									<th>{l s='Category name' mod='blockcms'}</th>
-									<th>{l s='Position' mod='blockcms'}</th>
 									<th></th>
 								</tr>
 							</thead>
@@ -81,8 +80,6 @@
 								{foreach $cms_blocks_position.blocks as $cms_block}
 									<tr class="{if $key%2}alt_row{else}not_alt_row{/if} row_hover" id="tr_{$key%2}_{$cms_block['id_cms_block']}_{$cms_block['position']}">
 										<td>{$cms_block['id_cms_block']}</td>
-										<td>{$cms_block['block_name']}</td>
-										<td>{$cms_block['category_name']}</td>
 										<td class="center pointer dragHandle" id="td_{$key%2}_{$cms_block['id_cms_block']}">
 											<div class="dragGroup">
 												<div class="positions">
@@ -90,6 +87,7 @@
 												</div>
 											</div>
 										</td>
+                    <td>{$cms_block['block_name']}</td>
 										<td>
 											<div class="btn-group-action">
 												<div class="btn-group pull-right">
@@ -141,7 +139,7 @@
                 {foreach $cms_category.pages as $key => $page}
                   <tr {if $key%2}class="alt_row"{/if}>
                     <td>
-                      <input type="checkbox" class="cmsBox" name="{$input.name}" id="{$page.id_cms}" value="{$page.id_cms}" {if isset($fields_value[$page.id_cms])}checked="checked"{/if} />
+                      <input type="checkbox" class="cmsBox" name="{$input.name}" id="{$page.id_cms}" value="{$page.id_cms}" {if in_array($page.id_cms, $fields_value['content']['cms'])}checked="checked"{/if} />
                     </td>
                     <td class="fixed-width-xs">
                       {$page.id_cms}

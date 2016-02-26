@@ -33,12 +33,27 @@ class AdminLinkWidgetController extends ModuleAdminController
         parent::init();
     }
 
+    public function postProcess()
+    {
+        $this->addNameArrayToPost();
+        if (!$this->validateForm($_POST)) {
+            return false;
+        }
+
+        if (Tools::isSubmit('submitBlockCMS')) {
+            $cmsBlock = new CmsBlock(Tools::getValue('id_cms_block'));
+            $cmsBlock->name = Tools::getValue('name');
+            $cmsBlock->id_hook = Tools::getValue('id_hook');
+            $cmsBlock->content['cms'] = (array)Tools::getValue('cms');
+            $cmsBlock->save();
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminLinkWidget'));
+        }
+
+        return parent::postProcess();
+    }
+
     public function renderView()
     {
-        $current_index = AdminController::$currentIndex;
-        $token = Tools::getAdminTokenLite('AdminModules');
-
-        $this->_display = 'index';
         $this->fields_form[]['form'] = array(
             'legend' => array(
                 'title' => $this->module->l('CMS block configuration'),
@@ -65,7 +80,7 @@ class AdminLinkWidgetController extends ModuleAdminController
         $this->getLanguages();
 
 
-        $helper = $this->initForm();
+        $helper = $this->buildHelper();
         $helper->submit_action = '';
         $helper->title = $this->module->l('CMS Block configuration');
 
@@ -76,23 +91,6 @@ class AdminLinkWidgetController extends ModuleAdminController
 
     public function renderForm()
     {
-        $token = Tools::getAdminTokenLite('AdminModules');
-        $back = Tools::safeOutput(Tools::getValue('back', ''));
-        $current_index = AdminController::$currentIndex;
-        if (!isset($back) || empty($back)) {
-            $back = $current_index.'&amp;configure='.$this->name.'&token='.$token;
-        }
-
-        if (Tools::isSubmit('editBlockCMS') && Tools::getValue('id_cms_block')) {
-            $this->_display = 'edit';
-            $id_cms_block = (int)Tools::getValue('id_cms_block');
-            $cmsBlock = BlockCMSModel::getBlockCMS($id_cms_block);
-            $cmsBlockCategories = BlockCMSModel::getCMSBlockPagesCategories($id_cms_block);
-            $cmsBlockPages = BlockCMSModel::getCMSBlockPages(Tools::getValue('id_cms_block'));
-        } else {
-            $this->_display = 'add';
-        }
-
         $this->fields_form[0]['form'] = array(
             'tinymce' => true,
             'legend' => array(
@@ -101,12 +99,16 @@ class AdminLinkWidgetController extends ModuleAdminController
             ),
             'input' => array(
                 array(
-                    'type' => 'text',
-                    'label' => $this->l('Name of the CMS block'),
-                    'name' => 'block_name',
-                    'lang' => true,
-                    'desc' => $this->l('If you leave this field empty, the block name will use the category name by default.')
+                    'type' => 'hidden',
+                    'name' => 'id_cms_block',
                 ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Name of the CMS block'),
+                        'name' => 'name',
+                        'lang' => true,
+                        'desc' => $this->l('If you leave this field empty, the block name will use the category name by default.')
+                    ),
                 array(
                     'type' => 'select',
                     'label' => $this->l('Hook'),
@@ -121,7 +123,7 @@ class AdminLinkWidgetController extends ModuleAdminController
                 array(
                     'type' => 'cms_pages',
                     'label' => $this->l('CMS content'),
-                    'name' => 'cmsBox[]',
+                    'name' => 'cms[]',
                     'values' => $this->repository->getCmsPages(),
                     'desc' => $this->l('Please mark every page that you want to display in this block.')
                 ),
@@ -129,7 +131,8 @@ class AdminLinkWidgetController extends ModuleAdminController
             'buttons' => array(
                 'cancelBlock' => array(
                     'title' => $this->l('Cancel'),
-                    'href' => $back,
+                    'href' => (Tools::safeOutput(Tools::getValue('back', false)))
+                                ?: $this->context->link->getAdminLink('AdminLinkWidget'),
                     'icon' => 'process-icon-cancel'
                 )
             ),
@@ -139,72 +142,30 @@ class AdminLinkWidgetController extends ModuleAdminController
             )
         );
 
-        $this->context->controller->getLanguages();
-        foreach ($this->context->controller->_languages as $language) {
-            if (Tools::getValue('block_name_'.$language['id_lang'])) {
-                $this->fields_value['block_name'][$language['id_lang']] = Tools::getValue('block_name_'.$language['id_lang']);
-            } elseif (isset($cmsBlock) && isset($cmsBlock[$language['id_lang']]['name'])) {
-                $this->fields_value['block_name'][$language['id_lang']] = $cmsBlock[$language['id_lang']]['name'];
-            } else {
-                $this->fields_value['block_name'][$language['id_lang']] = '';
-            }
+        $cmsBlock = new CmsBlock((int)Tools::getValue('id_cms_block'));
+
+        if ($id_hook = Tools::getValue('id_hook')) {
+            $cmsBlock->id_hook = $id_hook;
         }
 
-        if (Tools::getValue('display_stores')) {
-            $this->fields_value['display_stores'] = Tools::getValue('display_stores');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['display_store'])) {
-            $this->fields_value['display_stores'] = $cmsBlock[1]['display_store'];
-        } else {
-            $this->fields_value['display_stores'] = '';
+        if (Tools::getValue('name')) {
+            $cmsBlock->name = Tools::getValue('name');
         }
 
-        if (Tools::getValue('id_category')) {
-            $this->fields_value['id_category'] = (int)Tools::getValue('id_category');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['id_cms_category'])) {
-            $this->fields_value['id_category'] = $cmsBlock[1]['id_cms_category'];
-        }
-
-        if (Tools::getValue('id_hook')) {
-            $this->fields_value['id_hook'] = Tools::getValue('id_hook');
-        } elseif (isset($cmsBlock) && isset($cmsBlock[1]['id_hook'])) {
-            $this->fields_value['id_hook'] = $cmsBlock[1]['id_hook'];
-        } else {
-            $this->fields_value['id_hook'] = 0;
-        }
-
-        if ($cmsBoxes = Tools::getValue('cmsBox')) {
-            foreach ($cmsBoxes as $key => $value) {
-                $this->fields_value[$value] = true;
-            }
-        } else {
-            if (isset($cmsBlockPages) && is_array($cmsBlockPages) && count($cmsBlockPages) > 0) {
-                foreach ($cmsBlockPages as $item) {
-                    $this->fields_value['0_'.$item['id_cms']] = true;
-                }
-            }
-            if (isset($cmsBlockCategories) && is_array($cmsBlockCategories) && count($cmsBlockCategories) > 0) {
-                foreach ($cmsBlockCategories as $item) {
-                    $this->fields_value['1_'.$item['id_cms']] = true;
-                }
-            }
-        }
-
-        $helper = $this->initForm();
-
+        $helper = $this->buildHelper();
         if (isset($id_cms_block)) {
-            $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name.'&id_cms_block='.$id_cms_block;
+            $helper->currentIndex = AdminController::$currentIndex.'&id_cms_block='.$id_cms_block;
             $helper->submit_action = 'editBlockCMS';
         } else {
             $helper->submit_action = 'addBlockCMS';
         }
 
-        $helper->fields_value = isset($this->fields_value) ? $this->fields_value : array();
-
+        $helper->fields_value = (array)$cmsBlock;
 
         return $helper->generateForm($this->fields_form);
     }
 
-    protected function initForm()
+    protected function buildHelper()
     {
         $helper = new HelperForm();
 
@@ -222,6 +183,11 @@ class AdminLinkWidgetController extends ModuleAdminController
         return $helper;
     }
 
+    public function validateForm($data)
+    {
+        return true;
+    }
+
     public function initToolBarTitle()
     {
         $this->toolbar_title[] = $this->module->l('Themes');
@@ -234,5 +200,17 @@ class AdminLinkWidgetController extends ModuleAdminController
         $this->addJS(_PS_JS_DIR_.'admin/dnd.js');
 
         return parent::setMedia();
+    }
+
+    private function addNameArrayToPost()
+    {
+        $languages = Language::getLanguages();
+        $names = [];
+        foreach ($languages as $lang) {
+            if ($name = Tools::getValue('name_'.$lang['id_lang'])) {
+                $names[$lang['id_lang']] = $name;
+            }
+        }
+        $_POST['name'] = $names;
     }
 }
