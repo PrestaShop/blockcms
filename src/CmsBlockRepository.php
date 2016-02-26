@@ -113,7 +113,15 @@ class CmsBlockRepository
                 WHERE (lower(h.`name`) LIKE 'display%')
                 ORDER BY h.name ASC
             ";
-        return $this->db->executeS($sql);
+        $hooks = $this->db->executeS($sql);
+
+        foreach ($hooks as $key => $hook) {
+            if (preg_match('/admin/i', $hook['name'])
+                || preg_match('/backoffice/i', $hook['name'])) {
+                unset($hooks[$key]);
+            }
+        }
+        return $hooks;
     }
 
     public function getCmsPages($id_lang = null)
