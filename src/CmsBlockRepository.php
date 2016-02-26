@@ -142,7 +142,7 @@ class CmsBlockRepository
                 ON (cc.`id_cms_category` = ccs.`id_cms_category`)
             WHERE `active` = 1
                 AND ccl.`id_lang`= $id_lang
-                AND ccl.`id_shop`= {$this->shop->id}
+                AND ccs.`id_shop`= {$this->shop->id}
         ";
 
         $pages = $this->db->executeS($categories);

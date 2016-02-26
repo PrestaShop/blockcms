@@ -30,7 +30,8 @@ if (!defined('_CAN_LOAD_FILES_')) {
 }
 
 include_once(__DIR__ . '/BlockCMSModel.php');
-include_once(__DIR__ . '/src/BlockCmsRepository.php');
+include_once(__DIR__ . '/src/CmsBlockRepository.php');
+include_once(__DIR__ . '/src/CmsBlock.php');
 
 class blockcms extends Module
 {
