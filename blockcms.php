@@ -56,8 +56,6 @@ class blockcms extends Module
 
     public function install()
     {
-        $this->_clearCache('blockcms.tpl');
-
         $repository = new CmsBlockRepository(
             Db::getInstance(),
             $this->context->shop
@@ -65,21 +63,11 @@ class blockcms extends Module
 
         return parent::install()
             && $this->installTab()
-            && $this->registerHook('leftColumn')
-            && $this->registerHook('rightColumn')
-            && $this->registerHook('header')
-            && $this->registerHook('footer')
-            && $this->registerHook('actionObjectCmsUpdateAfter')
-            && $this->registerHook('actionObjectCmsDeleteAfter')
-            && $this->registerHook('actionShopDataDuplication')
-            && $this->registerHook('actionAdminStoresControllerUpdate_optionsAfter')
             && $repository->createTables();
     }
 
     public function uninstall()
     {
-        $this->_clearCache('blockcms.tpl');
-
         $repository = new CmsBlockRepository(
             Db::getInstance(),
             $this->context->shop
@@ -115,65 +103,6 @@ class blockcms extends Module
         Tools::redirectAdmin(
             $this->context->link->getAdminLink('AdminLinkWidget')
         );
-    }
-
-    public function displayBlockCMS($column = null)
-    {
-        if (!$this->isCached('blockcms.tpl', $this->getCacheId($column))) {
-            $this->smarty->assign(array(
-                'blocks' => [],
-            ));
-        }
-        return $this->display(__FILE__, 'blockcms.tpl', $this->getCacheId($column));
-    }
-
-    protected function getCacheId($name = null)
-    {
-        return parent::getCacheId('blockcms|'.$name);
-    }
-
-    public function hookActionAdminStoresControllerUpdate_optionsAfter()
-    {
-        if (Tools::getIsset('PS_STORES_DISPLAY_FOOTER')) {
-            $this->_clearCache('blockcms.tpl');
-        }
-    }
-
-    public function hookActionObjectCmsUpdateAfter()
-    {
-        $this->_clearCache('blockcms.tpl');
-    }
-
-    public function hookActionObjectCmsDeleteAfter()
-    {
-        $this->_clearCache('blockcms.tpl');
-    }
-
-    public function hookHeader($params)
-    {
-        $this->context->controller->addCSS(($this->_path).'blockcms.css', 'all');
-    }
-
-    public function hookLeftColumn()
-    {
-        return $this->displayBlockCMS();
-    }
-
-    public function hookRightColumn()
-    {
-        return $this->displayBlockCMS();
-    }
-
-    public function hookFooter()
-    {
-        if (!$this->isCached('blockcms.tpl', $this->getCacheId())) {
-            $this->smarty->assign(
-                array(
-                    'blocks' => [],
-                )
-            );
-        }
-        return $this->display(__FILE__, 'blockcms.tpl', $this->getCacheId());
     }
 
     public function hookActionShopDataDuplication($params)
