@@ -47,6 +47,10 @@ class AdminLinkWidgetController extends ModuleAdminController
             $cmsBlock->content['cms'] = (array)Tools::getValue('cms');
             $cmsBlock->save();
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminLinkWidget'));
+        } elseif (Tools::isSubmit('deleteCmsBlock')) {
+            $cmsBlock = new CmsBlock(Tools::getValue('id_cms_block'));
+            $cmsBlock->delete();
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminLinkWidget'));
         }
 
         return parent::postProcess();
