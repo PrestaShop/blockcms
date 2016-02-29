@@ -124,6 +124,22 @@ class CmsBlockRepository
         return $hooks;
     }
 
+    public function getByIdHook($id_hook)
+    {
+        $sql = "SELECT cb.`id_cms_block`
+                    FROM {$this->db_prefix}cms_block cb
+                    WHERE `id_hook` = $id_hook
+                ";
+        $ids = $this->db->executeS($sql);
+
+        $cmsBlock = [];
+        foreach ($ids as $id) {
+            $cmsBlock[] = new CmsBlock($id['id_cms_block']);
+        }
+
+        return $cmsBlock;
+    }
+
     public function getCmsPages($id_lang = null)
     {
         $id_lang = ($id_lang) ?: Context::getContext()->language->id;

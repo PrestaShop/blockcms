@@ -25,17 +25,22 @@
  *  International Registered Trademark & Property of PrestaShop SA
  */
 
+ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+
 if (!defined('_CAN_LOAD_FILES_')) {
     exit;
 }
 
 include_once(__DIR__ . '/src/CmsBlockRepository.php');
 include_once(__DIR__ . '/src/CmsBlock.php');
+include_once(__DIR__ . '/src/CmsBlockPresenter.php');
 
-class blockcms extends Module
+class blockcms extends Module implements WidgetInterface
 {
     protected $_html;
     protected $_display;
+    private $cmsBlockPresenter;
+    private $cmsBlockRepository;
 
     public function __construct()
     {
@@ -52,30 +57,29 @@ class blockcms extends Module
         $this->description = $this->l('Adds a block with several CMS links.');
         $this->secure_key = Tools::encrypt($this->name);
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+
+        $this->cmsBlockPresenter = new CmsBlockPresenter(
+            $this->context->link,
+            $this->context->language
+        );
+        $this->cmsBlockRepository = new CmsBlockRepository(
+            Db::getInstance(),
+            $this->context->shop
+        );
     }
 
     public function install()
     {
-        $repository = new CmsBlockRepository(
-            Db::getInstance(),
-            $this->context->shop
-        );
-
         return parent::install()
             && $this->installTab()
-            && $repository->createTables();
+            && $this->cmsBlockRepository->createTables();
     }
 
     public function uninstall()
     {
-        $repository = new CmsBlockRepository(
-            Db::getInstance(),
-            $this->context->shop
-        );
-
         return parent::uninstall()
             && $this->uninstallTab()
-            && $repository->dropTables();
+            && $this->cmsBlockRepository->dropTables();
     }
 
     public function installTab()
@@ -103,6 +107,28 @@ class blockcms extends Module
         Tools::redirectAdmin(
             $this->context->link->getAdminLink('AdminLinkWidget')
         );
+    }
+
+    public function renderWidget($hookName, array $configuration)
+    {
+        $this->context->smarty->assign([
+            'cmsBlocks' => $this->getWidgetVariables($hookName, $configuration)
+        ]);
+
+        return $this->context->smarty->fetch('module:blockcms/views/templates/hook/cmsblock.tpl');
+    }
+
+    public function getWidgetVariables($hookName, array $configuration)
+    {
+        $id_hook = Hook::getIdByName($hookName);
+        $cmsBlocks = $this->cmsBlockRepository->getByIdHook($id_hook);
+
+        $blocks = [];
+        foreach ($cmsBlocks as $block) {
+            $blocks[] = $this->cmsBlockPresenter->present($block);
+        }
+
+        return $blocks;
     }
 
     public function hookActionShopDataDuplication($params)
