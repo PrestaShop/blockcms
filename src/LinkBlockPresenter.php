@@ -1,6 +1,6 @@
 <?php
 
-class CmsBlockPresenter
+class LinkBlockPresenter
 {
     private $link;
     private $language;
@@ -11,7 +11,7 @@ class CmsBlockPresenter
         $this->language = $language;
     }
 
-    public function present(CmsBlock $cmsBlock)
+    public function present(LinkBlock $cmsBlock)
     {
         return [
             'id' => $cmsBlock->id,

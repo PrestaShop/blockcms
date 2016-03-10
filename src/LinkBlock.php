@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class CmsBlock extends ObjectModel
+class LinkBlock extends ObjectModel
 {
     public $id_cms_block;
     public $name;
@@ -36,8 +36,8 @@ class CmsBlock extends ObjectModel
      * @see ObjectModel::$definition
      */
     public static $definition = array(
-        'table' => 'cms_block',
-        'primary' => 'id_cms_block',
+        'table' => 'link_block',
+        'primary' => 'id_link_block',
         'multilang' => true,
         'fields' => array(
             'name' =>       array('type' => self::TYPE_STRING, 'lang' => true, 'required' => true, 'size' => 128),

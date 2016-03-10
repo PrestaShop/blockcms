@@ -39,8 +39,8 @@ class blockcms extends Module implements WidgetInterface
 {
     protected $_html;
     protected $_display;
-    private $cmsBlockPresenter;
-    private $cmsBlockRepository;
+    private $linkBlockPresenter;
+    private $linkBlockRepository;
 
     public function __construct()
     {
@@ -53,16 +53,16 @@ class blockcms extends Module implements WidgetInterface
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->l('CMS block');
-        $this->description = $this->l('Adds a block with several CMS links.');
+        $this->displayName = $this->l('Link List');
+        $this->description = $this->l('Adds a block with several links.');
         $this->secure_key = Tools::encrypt($this->name);
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
 
-        $this->cmsBlockPresenter = new CmsBlockPresenter(
+        $this->linkBlockPresenter  = new LinkBlockPresenter(
             $this->context->link,
             $this->context->language
         );
-        $this->cmsBlockRepository = new CmsBlockRepository(
+        $this->linkBlockRepository = new LinkBlockRepository(
             Db::getInstance(),
             $this->context->shop
         );
@@ -72,14 +72,14 @@ class blockcms extends Module implements WidgetInterface
     {
         return parent::install()
             && $this->installTab()
-            && $this->cmsBlockRepository->createTables();
+            && $this->linkBlockRepository->createTables();
     }
 
     public function uninstall()
     {
         return parent::uninstall()
             && $this->uninstallTab()
-            && $this->cmsBlockRepository->dropTables();
+            && $this->linkBlockRepository->dropTables();
     }
 
     public function installTab()
@@ -112,59 +112,22 @@ class blockcms extends Module implements WidgetInterface
     public function renderWidget($hookName, array $configuration)
     {
         $this->context->smarty->assign([
-            'cmsBlocks' => $this->getWidgetVariables($hookName, $configuration)
+            'linkBlocks' => $this->getWidgetVariables($hookName, $configuration)
         ]);
 
-        return $this->context->smarty->fetch('module:blockcms/views/templates/hook/cmsblock.tpl');
+        return $this->context->smarty->fetch('module:blockcms/views/templates/hook/linkblock.tpl');
     }
 
     public function getWidgetVariables($hookName, array $configuration)
     {
         $id_hook = Hook::getIdByName($hookName);
-        $cmsBlocks = $this->cmsBlockRepository->getByIdHook($id_hook);
+        $linkBlocks = $this->linkBlockRepository->getByIdHook($id_hook);
 
         $blocks = [];
-        foreach ($cmsBlocks as $block) {
-            $blocks[] = $this->cmsBlockPresenter->present($block);
+        foreach ($linkBlocks as $block) {
+            $blocks[] = $this->linkBlockPresenter->present($block);
         }
 
         return $blocks;
-    }
-
-    public function hookActionShopDataDuplication($params)
-    {
-        //get all cmd block to duplicate in new shop
-        $cms_blocks = Db::getInstance()->executeS('
-			SELECT * FROM `'._DB_PREFIX_.'cms_block` cb
-			JOIN `'._DB_PREFIX_.'cms_block_shop` cbf
-				ON (cb.`id_cms_block` = cbf.`id_cms_block` AND cbf.`id_shop` = '.(int)$params['old_id_shop'].') ');
-
-        if (count($cms_blocks)) {
-            foreach ($cms_blocks as $cms_block) {
-                Db::getInstance()->execute('
-					INSERT IGNORE INTO '._DB_PREFIX_.'cms_block (`id_cms_block`, `id_cms_category`, `location`, `position`, `display_store`)
-					VALUES (NULL, '.(int)$cms_block['id_cms_category'].', '.(int)$cms_block['location'].', '.(int)$cms_block['position'].', '.(int)$cms_block['display_store'].');');
-
-                $id_block_cms =  Db::getInstance()->Insert_ID();
-
-                Db::getInstance()->execute('INSERT IGNORE INTO '._DB_PREFIX_.'cms_block_shop (`id_cms_block`, `id_shop`) VALUES ('.(int)$id_block_cms.', '.(int)$params['new_id_shop'].');');
-
-                $langs = Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'cms_block_lang` WHERE `id_cms_block` = '.(int)$cms_block['id_cms_block']);
-
-                foreach ($langs as $lang) {
-                    Db::getInstance()->execute('
-						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_lang` (`id_cms_block`, `id_lang`, `name`)
-						VALUES ('.(int)$id_block_cms.', '.(int)$lang['id_lang'].', \''.pSQL($lang['name']).'\');');
-                }
-
-                $pages =  Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'cms_block_page` WHERE `id_cms_block` = '.(int)$cms_block['id_cms_block']);
-
-                foreach ($pages as $page) {
-                    Db::getInstance()->execute('
-						INSERT IGNORE INTO `'._DB_PREFIX_.'cms_block_page` (`id_cms_block_page`, `id_cms_block`, `id_cms`, `is_category`)
-						VALUES (NULL, '.(int)$id_block_cms.', '.(int)$page['id_cms'].', '.(int)$page['is_category'].');');
-                }
-            }
-        }
     }
 }
