@@ -184,4 +184,12 @@ class CmsBlockRepository
 
         return $pages;
     }
+
+    public function getCountByIdHook($id_hook)
+    {
+        $sql = "SELECT COUNT(*) FROM {$this->db_prefix}cms_block
+                    WHERE `id_hook` = $id_hook";
+
+        return Db::getInstance()->getValue($sql);
+    }
 }

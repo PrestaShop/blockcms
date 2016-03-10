@@ -46,10 +46,21 @@ class AdminLinkWidgetController extends ModuleAdminController
             $cmsBlock->id_hook = Tools::getValue('id_hook');
             $cmsBlock->content['cms'] = (array)Tools::getValue('cms');
             $cmsBlock->save();
+
+            $hook_name = Hook::getNameById(Tools::getValue('id_hook'));
+            if (!Hook::isModuleRegisteredOnHook($this->module, $hook_name, $this->context->shop->id)) {
+                Hook::registerHook($this->module, $hook_name);
+            }
+
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminLinkWidget'));
         } elseif (Tools::isSubmit('deleteCmsBlock')) {
             $cmsBlock = new CmsBlock(Tools::getValue('id_cms_block'));
             $cmsBlock->delete();
+
+            if (!$this->repository->getCountByIdHook($cmsBlock->id_hook)) {
+                Hook::unregisterHook($this->module, Hook::getNameById($cmsBlock->id_hook));
+            }
+
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminLinkWidget'));
         }
 
