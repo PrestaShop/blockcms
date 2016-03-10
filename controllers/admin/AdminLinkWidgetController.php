@@ -106,6 +106,8 @@ class AdminLinkWidgetController extends ModuleAdminController
 
     public function renderForm()
     {
+        $cmsBlock = new LinkBlock((int)Tools::getValue('id_cms_block'));
+
         $this->fields_form[0]['form'] = array(
             'tinymce' => true,
             'legend' => array(
@@ -156,8 +158,6 @@ class AdminLinkWidgetController extends ModuleAdminController
                 'title' => $this->l('Save'),
             )
         );
-
-        $cmsBlock = new CmsBlock((int)Tools::getValue('id_cms_block'));
 
         if ($id_hook = Tools::getValue('id_hook')) {
             $cmsBlock->id_hook = $id_hook;
