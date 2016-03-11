@@ -35,7 +35,7 @@ include_once(__DIR__ . '/src/LinkBlockRepository.php');
 include_once(__DIR__ . '/src/LinkBlock.php');
 include_once(__DIR__ . '/src/LinkBlockPresenter.php');
 
-class blockcms extends Module implements WidgetInterface
+class Ps_LinkList extends Module implements WidgetInterface
 {
     protected $_html;
     protected $_display;
@@ -44,9 +44,9 @@ class blockcms extends Module implements WidgetInterface
 
     public function __construct()
     {
-        $this->name = 'blockcms';
+        $this->name = 'ps_linklist';
         $this->tab = 'front_office_features';
-        $this->version = '2.1.1';
+        $this->version = '1.0.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -56,7 +56,7 @@ class blockcms extends Module implements WidgetInterface
         $this->displayName = $this->l('Link List');
         $this->description = $this->l('Adds a block with several links.');
         $this->secure_key = Tools::encrypt($this->name);
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
 
         $this->linkBlockPresenter  = new LinkBlockPresenter(
             $this->context->link,
@@ -115,7 +115,7 @@ class blockcms extends Module implements WidgetInterface
             'linkBlocks' => $this->getWidgetVariables($hookName, $configuration)
         ]);
 
-        return $this->context->smarty->fetch('module:blockcms/views/templates/hook/linkblock.tpl');
+        return $this->context->smarty->fetch('module:ps_linklist/views/templates/hook/linkblock.tpl');
     }
 
     public function getWidgetVariables($hookName, array $configuration)

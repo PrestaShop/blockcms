@@ -70,9 +70,9 @@
 						<table class="table tableDnD cms" id="cms_block_{$key%2}">
 							<thead>
 								<tr class="nodrag nodrop">
-									<th>{l s='ID' mod='blockcms'}</th>
-                  <th>{l s='Position' mod='blockcms'}</th>
-									<th>{l s='Name of the block' mod='blockcms'}</th>
+									<th>{l s='ID' mod='ps_linklist'}</th>
+                  <th>{l s='Position' mod='ps_linklist'}</th>
+									<th>{l s='Name of the block' mod='ps_linklist'}</th>
 									<th></th>
 								</tr>
 							</thead>
@@ -91,16 +91,16 @@
 										<td>
 											<div class="btn-group-action">
 												<div class="btn-group pull-right">
-													<a class="btn btn-default" href="{$current}&amp;edit{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='blockcms'}">
-														<i class="icon-edit"></i> {l s='Edit' mod='blockcms'}
+													<a class="btn btn-default" href="{$current}&amp;edit{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Edit' mod='ps_linklist'}">
+														<i class="icon-edit"></i> {l s='Edit' mod='ps_linklist'}
 													</a>
 													<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 														<i class="icon-caret-down"></i>&nbsp;
 													</button>
 													<ul class="dropdown-menu">
 													<li>
-														<a href="{$current}&amp;delete{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='blockcms'}">
-															<i class="icon-trash"></i> {l s='Delete' mod='blockcms'}
+														<a href="{$current}&amp;delete{$identifier}&amp;id_cms_block={(int)$cms_block['id_cms_block']}" title="{l s='Delete' mod='ps_linklist'}">
+															<i class="icon-trash"></i> {l s='Delete' mod='ps_linklist'}
 														</a>
 													</li>
 													</ul>
@@ -131,8 +131,8 @@
                   <th>
                     <input type="checkbox" name="checkme" id="checkme" class="noborder" onclick="checkDelBoxes(this.form, '{$input.name}', this.checked)" />
                   </th>
-                  <th>{l s='ID' mod='blockcms'}</th>
-                  <th>{l s='Name' mod='blockcms'}</th>
+                  <th>{l s='ID' mod='ps_linklist'}</th>
+                  <th>{l s='Name' mod='ps_linklist'}</th>
                 </tr>
               </thead>
               <tbody>
