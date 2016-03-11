@@ -31,9 +31,9 @@ if (!defined('_CAN_LOAD_FILES_')) {
     exit;
 }
 
-include_once(__DIR__ . '/src/CmsBlockRepository.php');
-include_once(__DIR__ . '/src/CmsBlock.php');
-include_once(__DIR__ . '/src/CmsBlockPresenter.php');
+include_once(__DIR__ . '/src/LinkBlockRepository.php');
+include_once(__DIR__ . '/src/LinkBlock.php');
+include_once(__DIR__ . '/src/LinkBlockPresenter.php');
 
 class blockcms extends Module implements WidgetInterface
 {
