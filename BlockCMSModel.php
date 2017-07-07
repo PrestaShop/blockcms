@@ -320,7 +320,7 @@ class BlockCMSModel extends ObjectModel
 		if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true && $id_shop != false) {
 			$where_shop = ' AND cl.`id_shop` = '.(int)$id_shop;
 		}
-			
+
 		$sql = 'SELECT cl.`meta_title`, cl.`link_rewrite`
 			FROM `'._DB_PREFIX_.'cms_lang` cl
 			INNER JOIN `'._DB_PREFIX_.'cms` c
@@ -419,6 +419,7 @@ class BlockCMSModel extends ObjectModel
 			ON (bcp.`id_cms` = cl.`id_cms_category`)
 			WHERE bcp.`id_cms_block` = '.(int)$id_cms_block.'
 			AND cl.`id_lang` = '.(int)Context::getContext()->language->id.'
+			AND cl.`id_shop` = '.(int)Context::getContext()->shop->id.'
 			AND bcp.`is_category` = 1';
 
 		return Db::getInstance()->executeS($sql);
